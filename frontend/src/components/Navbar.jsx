@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, User as UserIcon } from 'lucide-react';
+import { LogOut, User as UserIcon, ShoppingCart, Search } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -20,10 +20,22 @@ const Navbar = () => {
               <span className="text-xl font-bold text-brand-600">Agennt</span>
             </Link>
           </div>
-          <div className="flex items-center">
+            <div className="hidden md:flex space-x-8 items-center ml-10">
+              <Link to="/shop" className="text-slate-600 hover:text-brand-600 font-medium transition">Shop</Link>
+              <Link to="/categories" className="text-slate-600 hover:text-brand-600 font-medium transition">Categories</Link>
+            </div>
+          </div>
+          <div className="flex items-center space-x-6">
+            <button className="text-slate-500 hover:text-brand-600 transition">
+              <Search size={20} />
+            </button>
+            <button className="text-slate-500 hover:text-brand-600 transition relative">
+              <ShoppingCart size={20} />
+              <span className="absolute -top-2 -right-2 bg-brand-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">3</span>
+            </button>
             {user ? (
               <div className="flex items-center space-x-4">
-                <Link to="/dashboard" className="text-slate-600 hover:text-brand-600 transition">Dashboard</Link>
+                <Link to="/dashboard" className="hidden sm:block text-slate-600 hover:text-brand-600 transition">Dashboard</Link>
                 <div className="flex items-center space-x-2 text-slate-700 bg-slate-100 px-3 py-1 rounded-full">
                   <UserIcon size={16} />
                   <span className="text-sm font-medium">{user.name}</span>
