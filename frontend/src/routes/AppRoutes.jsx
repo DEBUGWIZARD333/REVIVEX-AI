@@ -6,6 +6,7 @@ import Register from '../pages/Register';
 import Dashboard from '../pages/Dashboard';
 import Unauthorized from '../pages/Unauthorized';
 import ProductList from '../pages/ProductList';
+import ProductDetail from '../pages/ProductDetail';
 
 const AppRoutes = () => {
   return (
@@ -13,6 +14,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Home />} />
       <Route path="/shop" element={<ProductList />} />
       <Route path="/products" element={<ProductList />} />
+      <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
