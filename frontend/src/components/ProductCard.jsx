@@ -66,6 +66,13 @@ const ProductCard = ({ product }) => {
           </div>
           <span className="text-xs text-slate-500 ml-2">({product.reviews || Math.floor(Math.random() * 100 + 1)})</span>
         </div>
+        
+        <Link 
+          to={`/products/${product._id || product.id}`}
+          className="mt-4 w-full block text-center bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold py-2.5 rounded-lg transition-colors border border-brand-200"
+        >
+          View Details
+        </Link>
       </div>
     </div>
   );

@@ -5,11 +5,14 @@ import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Dashboard from '../pages/Dashboard';
 import Unauthorized from '../pages/Unauthorized';
+import ProductList from '../pages/ProductList';
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/shop" element={<ProductList />} />
+      <Route path="/products" element={<ProductList />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
