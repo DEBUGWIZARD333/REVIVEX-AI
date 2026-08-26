@@ -1,14 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { Trash2, ShoppingBag, ArrowLeft, Plus, Minus, ArrowRight, ShieldCheck } from 'lucide-react';
+import OrderSummary from '../components/OrderSummary';
+import { Trash2, ShoppingBag, ArrowLeft, Plus, Minus } from 'lucide-react';
 
 const Cart = () => {
-  const { cartItems, updateQuantity, removeFromCart, clearCart, subtotal, totalCount } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, clearCart, totalCount } = useCart();
   const navigate = useNavigate();
-
-  const shipping = subtotal > 100 || cartItems.length === 0 ? 0 : 9.99;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
 
   // Visual helper gradient for missing images
   const getGradient = (category) => {
@@ -158,48 +155,13 @@ const Cart = () => {
             </div>
           </div>
 
-          {/* Order Summary Sidebar */}
-          <div className="lg:col-span-4 bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100 sticky top-24">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">Order Summary</h2>
-
-            <div className="space-y-4 text-sm text-slate-600 border-b border-slate-100 pb-6">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span className="font-semibold text-slate-900">${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>
-                  {shipping === 0 ? (
-                    <span className="text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded text-xs">FREE</span>
-                  ) : (
-                    `$${shipping.toFixed(2)}`
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Estimated Tax (8%)</span>
-                <span className="font-semibold text-slate-900">${tax.toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className="flex justify-between items-center py-6 border-b border-slate-100 mb-6">
-              <span className="text-lg font-bold text-slate-900">Total</span>
-              <span className="text-2xl font-extrabold text-brand-600">${total.toFixed(2)}</span>
-            </div>
-
-            <button
-              onClick={() => navigate('/checkout')}
-              className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2"
-            >
-              <span>Proceed to Checkout</span>
-              <ArrowRight size={18} />
-            </button>
-
-            <div className="mt-6 flex items-center justify-center space-x-2 text-xs text-slate-400">
-              <ShieldCheck size={16} className="text-emerald-500" />
-              <span>Secure & Encrypted Checkout</span>
-            </div>
+          {/* Reusable Order Summary Component */}
+          <div className="lg:col-span-4">
+            <OrderSummary
+              actionButtonText="Proceed to Checkout"
+              onActionButtonClick={() => navigate('/checkout')}
+              showPromoInput={true}
+            />
           </div>
 
         </div>

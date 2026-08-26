@@ -10,6 +10,11 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
 
+  // Promo code state
+  const [discountCode, setDiscountCode] = useState('');
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [discountFlat, setDiscountFlat] = useState(0);
+
   // Show auto-hiding notification toast
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
@@ -22,7 +27,6 @@ export const CartProvider = ({ children }) => {
       try {
         setLoading(true);
         const backendCart = await cartService.fetchCart();
-        // Normalize cart structure
         const formatted = backendCart.map((item) => ({
           _id: item._id,
           product: item.productId,
@@ -52,13 +56,11 @@ export const CartProvider = ({ children }) => {
     loadCart();
   }, [loadCart]);
 
-  // Save guest cart to local storage
   const saveGuestCart = (items) => {
     setCartItems(items);
     localStorage.setItem('guestCart', JSON.stringify(items));
   };
 
-  // Add product to cart
   const addToCart = async (product, quantity = 1) => {
     const productId = product._id || product.id;
 
@@ -75,7 +77,6 @@ export const CartProvider = ({ children }) => {
         setLoading(false);
       }
     } else {
-      // Guest cart handling
       const existingIndex = cartItems.findIndex(
         (item) => (item.product._id || item.product.id) === productId
       );
@@ -99,7 +100,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Update item quantity
   const updateQuantity = async (cartItemId, quantity) => {
     if (quantity < 1) return removeFromCart(cartItemId);
 
@@ -122,7 +122,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Remove item from cart
   const removeFromCart = async (cartItemId) => {
     if (user) {
       try {
@@ -143,7 +142,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Clear cart
   const clearCart = async () => {
     if (user) {
       try {
@@ -162,12 +160,54 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Derived metrics
+  // Promo Code Handler
+  const applyPromoCode = (code) => {
+    const cleanCode = code.trim().toUpperCase();
+    if (cleanCode === 'REVENUE10') {
+      setDiscountCode('REVENUE10');
+      setDiscountPercent(10);
+      setDiscountFlat(0);
+      showNotification('Promo code REVENUE10 applied (10% OFF)!');
+      return { success: true, message: '10% discount applied!' };
+    } else if (cleanCode === 'WELCOME20') {
+      setDiscountCode('WELCOME20');
+      setDiscountPercent(20);
+      setDiscountFlat(0);
+      showNotification('Promo code WELCOME20 applied (20% OFF)!');
+      return { success: true, message: '20% discount applied!' };
+    } else if (cleanCode === 'SAVE15') {
+      setDiscountCode('SAVE15');
+      setDiscountPercent(0);
+      setDiscountFlat(15);
+      showNotification('Promo code SAVE15 applied ($15 OFF)!');
+      return { success: true, message: '$15 flat discount applied!' };
+    } else {
+      showNotification('Invalid promo code. Try REVENUE10 or WELCOME20', 'error');
+      return { success: false, message: 'Invalid promo code' };
+    }
+  };
+
+  const removePromoCode = () => {
+    setDiscountCode('');
+    setDiscountPercent(0);
+    setDiscountFlat(0);
+    showNotification('Promo code removed');
+  };
+
+  // Calculations
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cartItems.reduce((acc, item) => {
     const price = item.product?.price || 0;
     return acc + price * item.quantity;
   }, 0);
+
+  const shippingFee = subtotal > 100 || cartItems.length === 0 ? 0 : 9.99;
+  const tax = subtotal * 0.08;
+  const discountAmount = discountPercent > 0
+    ? (subtotal * discountPercent) / 100
+    : Math.min(discountFlat, subtotal);
+    
+  const grandTotal = Math.max(0, subtotal + shippingFee + tax - discountAmount);
 
   return (
     <CartContext.Provider
@@ -177,6 +217,13 @@ export const CartProvider = ({ children }) => {
         notification,
         totalCount,
         subtotal,
+        shippingFee,
+        tax,
+        discountCode,
+        discountAmount,
+        grandTotal,
+        applyPromoCode,
+        removePromoCode,
         addToCart,
         updateQuantity,
         removeFromCart,
