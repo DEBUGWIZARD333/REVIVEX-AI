@@ -189,7 +189,7 @@ const Cart = () => {
             </div>
 
             <button
-              onClick={() => alert('Proceeding to checkout module!')}
+              onClick={() => navigate('/checkout')}
               className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2"
             >
               <span>Proceed to Checkout</span>
