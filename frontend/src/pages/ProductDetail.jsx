@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Star, ArrowLeft, ShoppingCart, Check, X } from 'lucide-react';
+import * as productService from '../services/productService';
+import { useCart } from '../context/CartContext';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,8 +18,8 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/api/products/${id}`);
-        setProduct(response.data);
+        const data = await productService.getProductById(id);
+        setProduct(data);
         setError(null);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch product details.');
@@ -29,11 +32,11 @@ const ProductDetail = () => {
   }, [id]);
 
   const handleAddToCart = () => {
-    // Placeholder for actual cart functionality
-    alert(`Added ${quantity} of ${product.name} to cart!`);
+    if (product) {
+      addToCart(product, quantity);
+    }
   };
 
-  // Mock image generator based on category if no image exists
   const getGradient = (category) => {
     switch (category?.toLowerCase()) {
       case 'electronics': return 'from-blue-400 to-indigo-500';
@@ -55,11 +58,11 @@ const ProductDetail = () => {
   if (error) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
-        <div className="bg-red-50 border border-red-200 text-red-600 rounded-lg p-8 max-w-md w-full text-center shadow-sm">
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded-2xl p-8 max-w-md w-full text-center shadow-sm">
           <p className="font-semibold text-lg mb-6">{error}</p>
           <button 
             onClick={() => navigate('/shop')}
-            className="px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-md font-medium transition w-full"
+            className="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold transition w-full"
           >
             Back to Shop
           </button>
@@ -77,7 +80,7 @@ const ProductDetail = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb / Back Button */}
-        <Link to="/shop" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-brand-600 mb-8 transition-colors">
+        <Link to="/shop" className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-brand-600 mb-8 transition-colors">
           <ArrowLeft size={16} className="mr-2" /> Back to products
         </Link>
 
@@ -104,12 +107,12 @@ const ProductDetail = () => {
             {/* Details Section */}
             <div className="p-8 md:p-12 lg:p-16 flex flex-col justify-center">
               <div className="mb-2">
-                <span className="text-sm font-semibold tracking-wider text-brand-600 uppercase">
+                <span className="text-xs font-bold tracking-wider text-brand-600 uppercase bg-brand-50 px-3 py-1 rounded-full">
                   {product.category}
                 </span>
               </div>
               
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight mt-3">
                 {product.name}
               </h1>
 
@@ -124,48 +127,48 @@ const ProductDetail = () => {
                   ))}
                 </div>
                 <span className="text-sm text-slate-500 ml-3 font-medium">
-                  {product.rating?.toFixed(1) || '0.0'} ({product.reviews || Math.floor(Math.random() * 100 + 1)} reviews)
+                  {product.rating?.toFixed(1) || '4.5'} ({product.reviews || Math.floor(Math.random() * 50 + 10)} reviews)
                 </span>
               </div>
 
-              <p className="text-3xl font-bold text-slate-900 mb-6">
+              <p className="text-3xl font-extrabold text-slate-900 mb-6">
                 ${product.price?.toFixed(2)}
               </p>
 
-              <div className="prose prose-slate prose-sm text-slate-500 mb-8">
+              <div className="prose prose-slate prose-sm text-slate-600 mb-8 leading-relaxed">
                 <p>{product.description}</p>
               </div>
 
               <div className="border-t border-slate-100 pt-8 mb-8">
                 <div className="flex items-center mb-6">
                   {inStock ? (
-                    <span className="flex items-center text-emerald-600 font-medium bg-emerald-50 px-3 py-1 rounded-full text-sm">
-                      <Check size={16} className="mr-1" /> In Stock ({product.stock} available)
+                    <span className="flex items-center text-emerald-600 font-semibold bg-emerald-50 px-3 py-1 rounded-full text-sm">
+                      <Check size={16} className="mr-1.5" /> In Stock ({product.stock} available)
                     </span>
                   ) : (
-                    <span className="flex items-center text-red-600 font-medium bg-red-50 px-3 py-1 rounded-full text-sm">
-                      <X size={16} className="mr-1" /> Out of Stock
+                    <span className="flex items-center text-red-600 font-semibold bg-red-50 px-3 py-1 rounded-full text-sm">
+                      <X size={16} className="mr-1.5" /> Out of Stock
                     </span>
                   )}
                 </div>
 
                 {/* Quantity and Add to Cart */}
                 <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                  <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                  <div className="flex items-center border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
                     <button 
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       disabled={!inStock}
-                      className="px-4 py-3 text-slate-600 hover:bg-slate-200 disabled:opacity-50 transition"
+                      className="px-4 py-3 text-slate-600 hover:bg-slate-200 disabled:opacity-50 transition font-bold"
                     >
                       -
                     </button>
-                    <span className="px-4 py-3 font-medium text-slate-900 min-w-[3rem] text-center">
+                    <span className="px-4 py-3 font-semibold text-slate-900 min-w-[3rem] text-center">
                       {quantity}
                     </span>
                     <button 
-                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                      disabled={!inStock || quantity >= product.stock}
-                      className="px-4 py-3 text-slate-600 hover:bg-slate-200 disabled:opacity-50 transition"
+                      onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))}
+                      disabled={!inStock || quantity >= (product.stock || 99)}
+                      className="px-4 py-3 text-slate-600 hover:bg-slate-200 disabled:opacity-50 transition font-bold"
                     >
                       +
                     </button>
@@ -174,7 +177,7 @@ const ProductDetail = () => {
                   <button
                     onClick={handleAddToCart}
                     disabled={!inStock}
-                    className="flex-1 flex items-center justify-center px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                    className="flex-1 flex items-center justify-center px-8 py-3.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:scale-[1.02]"
                   >
                     <ShoppingCart size={20} className="mr-2" />
                     {inStock ? 'Add to Cart' : 'Out of Stock'}

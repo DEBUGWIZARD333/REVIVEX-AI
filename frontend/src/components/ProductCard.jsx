@@ -1,7 +1,10 @@
 import { Star, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product }) => {
+  const { addToCart } = useCart();
+
   // Mock image based on category for visual placeholder
   const getGradient = (category) => {
     switch (category?.toLowerCase()) {
@@ -10,6 +13,12 @@ const ProductCard = ({ product }) => {
       case 'home': return 'from-amber-400 to-orange-500';
       default: return 'from-brand-400 to-brand-600';
     }
+  };
+
+  const handleQuickAdd = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product, 1);
   };
 
   return (
@@ -29,8 +38,11 @@ const ProductCard = ({ product }) => {
         )}
         
         {/* Quick Add overlay */}
-        <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 bg-gradient-to-t from-black/50 to-transparent">
-          <button className="w-full bg-white text-slate-900 font-semibold py-2 rounded-lg flex items-center justify-center hover:bg-brand-50 transition-colors">
+        <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 bg-gradient-to-t from-black/60 to-transparent">
+          <button
+            onClick={handleQuickAdd}
+            className="w-full bg-white hover:bg-brand-600 hover:text-white text-slate-900 font-semibold py-2.5 rounded-xl flex items-center justify-center transition-colors shadow-md text-sm"
+          >
             <ShoppingCart size={18} className="mr-2" /> Quick Add
           </button>
         </div>
@@ -40,7 +52,7 @@ const ProductCard = ({ product }) => {
       <div className="p-5 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-2">
           <div>
-            <p className="text-xs font-medium text-brand-600 uppercase tracking-wider mb-1">{product.category}</p>
+            <p className="text-xs font-semibold text-brand-600 uppercase tracking-wider mb-1">{product.category}</p>
             <h3 className="text-lg font-bold text-slate-900 leading-tight line-clamp-1">
               <Link to={`/products/${product._id || product.id}`}>
                 {product.name}
@@ -64,12 +76,12 @@ const ProductCard = ({ product }) => {
               />
             ))}
           </div>
-          <span className="text-xs text-slate-500 ml-2">({product.reviews || Math.floor(Math.random() * 100 + 1)})</span>
+          <span className="text-xs text-slate-500 ml-2">({product.reviews || Math.floor(Math.random() * 50 + 5)})</span>
         </div>
         
         <Link 
           to={`/products/${product._id || product.id}`}
-          className="mt-4 w-full block text-center bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold py-2.5 rounded-lg transition-colors border border-brand-200"
+          className="mt-4 w-full block text-center bg-brand-50 hover:bg-brand-100 text-brand-700 font-semibold py-2.5 rounded-lg transition-colors border border-brand-200 text-sm"
         >
           View Details
         </Link>
