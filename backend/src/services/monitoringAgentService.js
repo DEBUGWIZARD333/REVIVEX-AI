@@ -1,5 +1,6 @@
 import Event from '../models/Event.js';
 import * as agentLogService from './agentLogService.js';
+import analysisEngine from './eventAnalysisEngine.js';
 
 const AGENT_NAME = 'EventMonitoringAgent';
 let isRunning = false;
@@ -19,99 +20,18 @@ export const fetchUnprocessedEvents = async (batchSize = 10) => {
 };
 
 /**
- * 2. Analyze individual event for revenue recovery insights
+ * 2. Analyze individual event using Rule-Based Analysis Engine
  */
-export const analyzeEvent = (event) => {
-  const { eventType, metadata, productId, userId } = event;
-  let analysis = {
-    category: 'GENERAL_EVENT',
-    recoveryTrigger: false,
-    severity: 'LOW',
-    actionRecommendation: 'No action required',
-  };
-
-  switch (eventType) {
-    case 'PRODUCT_VIEWED':
-      analysis = {
-        category: 'BROWSER_INTENT',
-        recoveryTrigger: false,
-        severity: 'LOW',
-        actionRecommendation: `User viewed ${productId?.name || 'product'}. Track browsing history.`,
-      };
-      break;
-
-    case 'ADD_TO_CART':
-      analysis = {
-        category: 'CART_ACTIVITY',
-        recoveryTrigger: true,
-        severity: 'MEDIUM',
-        actionRecommendation: `Item added to cart. Monitor for checkout within 15 mins.`,
-      };
-      break;
-
-    case 'REMOVE_CART_ITEM':
-      analysis = {
-        category: 'CART_FRICTION',
-        recoveryTrigger: true,
-        severity: 'MEDIUM',
-        actionRecommendation: `Item removed from cart. Evaluate potential price resistance.`,
-      };
-      break;
-
-    case 'CHECKOUT_STARTED':
-      analysis = {
-        category: 'HIGH_INTENT',
-        recoveryTrigger: true,
-        severity: 'HIGH',
-        actionRecommendation: `Checkout initiated for total $${metadata?.grandTotal || 'N/A'}. Ready for recovery nudge if abandoned.`,
-      };
-      break;
-
-    case 'PAYMENT_INITIATED':
-      analysis = {
-        category: 'TRANSACTION_ATTEMPT',
-        recoveryTrigger: true,
-        severity: 'HIGH',
-        actionRecommendation: `Payment processing with method ${metadata?.paymentMethod || 'card'}.`,
-      };
-      break;
-
-    case 'PAYMENT_FAILED':
-      analysis = {
-        category: 'REVENUE_LOSS_RISK',
-        recoveryTrigger: true,
-        severity: 'CRITICAL',
-        actionRecommendation: `Payment failed (${metadata?.reason || 'Transaction error'}). Immediate recovery notification required.`,
-      };
-      break;
-
-    case 'PAYMENT_SUCCESS':
-      analysis = {
-        category: 'CONVERTED',
-        recoveryTrigger: false,
-        severity: 'SUCCESS',
-        actionRecommendation: `Transaction completed. Order ID: ${metadata?.orderId}. Clear active recovery campaigns.`,
-      };
-      break;
-
-    default:
-      analysis = {
-        category: 'UNKNOWN',
-        recoveryTrigger: false,
-        severity: 'LOW',
-        actionRecommendation: 'Log and monitor.',
-      };
-  }
-
-  return analysis;
+export const analyzeEvent = async (event) => {
+  return await analysisEngine.analyzeEvent(event);
 };
 
 /**
- * 3. Process a single event: Log execution -> Analyze -> Complete Log -> Mark Processed
+ * 3. Process a single event: Log execution -> Analyze Rules -> Complete Log -> Mark Processed
  */
 export const processSingleEvent = async (event) => {
   // Step 3a: Write initial RECEIVED Log
-  const initialLog = await agentLogService.createAgentLog({
+  await agentLogService.createAgentLog({
     agentName: AGENT_NAME,
     eventId: event._id,
     eventType: event.eventType,
@@ -127,20 +47,20 @@ export const processSingleEvent = async (event) => {
       eventId: event._id,
       eventType: event.eventType,
       status: 'PROCESSING',
-      message: `Analyzing event payload and recovery parameters`,
+      message: `Running rule-based analysis engine`,
       processedAt: new Date(),
     });
 
-    // Step 3c: Execute event analysis
-    const analysis = analyzeEvent(event);
+    // Step 3c: Execute rule-based analysis engine
+    const analysis = await analyzeEvent(event);
 
-    // Step 3d: Write COMPLETED Log with analysis summary
+    // Step 3d: Write COMPLETED Log with exact required rule logMessage
     await agentLogService.createAgentLog({
       agentName: AGENT_NAME,
       eventId: event._id,
       eventType: event.eventType,
       status: 'COMPLETED',
-      message: `Analysis Complete: Category [${analysis.category}] | Severity [${analysis.severity}] | Action: ${analysis.actionRecommendation}`,
+      message: `${analysis.primaryLogMessage} | Intent: ${analysis.intent} | Rules Matched: [${analysis.matchedRules.join(', ') || 'NONE'}]`,
       processedAt: new Date(),
     });
 
