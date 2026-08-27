@@ -44,15 +44,21 @@ const eventSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    isProcessed: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt
   }
 );
 
-// Indexes on userId and eventType for optimized query performance
+// Indexes on userId, eventType, and isProcessed for optimized query performance
 eventSchema.index({ userId: 1 });
 eventSchema.index({ eventType: 1 });
+eventSchema.index({ isProcessed: 1 });
 eventSchema.index({ userId: 1, eventType: 1 });
 eventSchema.index({ timestamp: -1 });
 

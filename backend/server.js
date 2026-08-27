@@ -7,6 +7,8 @@ import productRoutes from './src/routes/productRoutes.js';
 import cartRoutes from './src/routes/cartRoutes.js';
 import eventRoutes from './src/routes/eventRoutes.js';
 import agentLogRoutes from './src/routes/agentLogRoutes.js';
+import monitoringRoutes from './src/routes/monitoringRoutes.js';
+import { startMonitoringAgent } from './src/services/monitoringAgentService.js';
 import { errorHandler, notFound } from './src/middlewares/errorMiddleware.js';
 
 // Load env vars
@@ -27,6 +29,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/agent-logs', agentLogRoutes);
+app.use('/api/monitoring', monitoringRoutes);
 
 // Error handling middleware
 app.use(notFound);
@@ -36,4 +39,6 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  // Start Event Monitoring Agent background polling loop (every 5 seconds)
+  startMonitoringAgent(5000);
 });
