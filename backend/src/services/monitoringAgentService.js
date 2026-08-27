@@ -1,6 +1,7 @@
 import Event from '../models/Event.js';
 import * as agentLogService from './agentLogService.js';
 import analysisEngine from './eventAnalysisEngine.js';
+import { handlePaymentFailureEvent } from './paymentFailureDetectorService.js';
 
 const AGENT_NAME = 'EventMonitoringAgent';
 let isRunning = false;
@@ -27,7 +28,7 @@ export const analyzeEvent = async (event) => {
 };
 
 /**
- * 3. Process a single event: Log execution -> Analyze Rules -> Complete Log -> Mark Processed
+ * 3. Process a single event: Log execution -> Analyze Rules -> Trigger Payment Failure Detector -> Complete Log -> Mark Processed
  */
 export const processSingleEvent = async (event) => {
   // Step 3a: Write initial RECEIVED Log
@@ -54,7 +55,12 @@ export const processSingleEvent = async (event) => {
     // Step 3c: Execute rule-based analysis engine
     const analysis = await analyzeEvent(event);
 
-    // Step 3d: Write COMPLETED Log with exact required rule logMessage
+    // Step 3d: Trigger Payment Failure Detector if event is PAYMENT_FAILED
+    if (event.eventType === 'PAYMENT_FAILED') {
+      await handlePaymentFailureEvent(event);
+    }
+
+    // Step 3e: Write COMPLETED Log with exact required rule logMessage
     await agentLogService.createAgentLog({
       agentName: AGENT_NAME,
       eventId: event._id,
