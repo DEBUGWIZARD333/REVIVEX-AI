@@ -11,6 +11,7 @@ import monitoringRoutes from './src/routes/monitoringRoutes.js';
 import riskEventRoutes from './src/routes/riskEventRoutes.js';
 import riskConfigRoutes from './src/routes/riskConfigRoutes.js';
 import cartAbandonmentRoutes from './src/routes/cartAbandonmentRoutes.js';
+import orderRoutes from './src/routes/orderRoutes.js';
 import { startMonitoringAgent } from './src/services/monitoringAgentService.js';
 import { startAbandonmentDetectorJob } from './src/services/cartAbandonmentService.js';
 import { errorHandler, notFound } from './src/middlewares/errorMiddleware.js';
@@ -37,6 +38,7 @@ app.use('/api/monitoring', monitoringRoutes);
 app.use('/api/risk-events', riskEventRoutes);
 app.use('/api/risk-config', riskConfigRoutes);
 app.use('/api/cart-abandonment', cartAbandonmentRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Error handling middleware
 app.use(notFound);
