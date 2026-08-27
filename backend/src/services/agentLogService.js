@@ -5,8 +5,20 @@ export const createAgentLog = async (logData) => {
   return await log.save();
 };
 
-export const getAgentLogs = async (filter = {}, limit = 50, skip = 0) => {
-  return await AgentLog.find(filter)
+export const getAgentLogsPaginated = async ({
+  filter = {},
+  page = 1,
+  limit = 10,
+  sortBy = 'processedAt',
+  sortOrder = 'desc',
+}) => {
+  const parsedPage = Math.max(1, parseInt(page, 10) || 1);
+  const parsedLimit = Math.max(1, parseInt(limit, 10) || 10);
+  const skip = (parsedPage - 1) * parsedLimit;
+  const sortDirection = sortOrder === 'asc' ? 1 : -1;
+
+  const total = await AgentLog.countDocuments(filter);
+  const data = await AgentLog.find(filter)
     .populate({
       path: 'eventId',
       populate: [
@@ -14,9 +26,19 @@ export const getAgentLogs = async (filter = {}, limit = 50, skip = 0) => {
         { path: 'productId', select: 'name price category' },
       ],
     })
-    .sort({ processedAt: -1 })
-    .limit(limit)
-    .skip(skip);
+    .sort({ [sortBy]: sortDirection })
+    .skip(skip)
+    .limit(parsedLimit);
+
+  const pages = Math.ceil(total / parsedLimit) || 1;
+
+  return {
+    total,
+    page: parsedPage,
+    limit: parsedLimit,
+    pages,
+    data,
+  };
 };
 
 export const getLogsByEventId = async (eventId) => {

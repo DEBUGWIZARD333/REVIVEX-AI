@@ -8,16 +8,18 @@ export const createLog = async (req, res, next) => {
 
     if (!agentName || !eventId || !eventType || !status) {
       return res.status(400).json({
+        success: false,
         message: 'agentName, eventId, eventType, and status are required fields',
       });
     }
 
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
-      return res.status(400).json({ message: 'Invalid eventId format' });
+      return res.status(400).json({ success: false, message: 'Invalid eventId format' });
     }
 
     if (!AGENT_LOG_STATUS.includes(status)) {
       return res.status(400).json({
+        success: false,
         message: `Invalid status. Allowed values: ${AGENT_LOG_STATUS.join(', ')}`,
       });
     }
@@ -32,7 +34,11 @@ export const createLog = async (req, res, next) => {
     };
 
     const savedLog = await agentLogService.createAgentLog(logPayload);
-    res.status(201).json(savedLog);
+    res.status(201).json({
+      success: true,
+      message: 'Agent log created successfully',
+      data: savedLog,
+    });
   } catch (error) {
     next(error);
   }
@@ -40,7 +46,19 @@ export const createLog = async (req, res, next) => {
 
 export const getLogs = async (req, res, next) => {
   try {
-    const { agentName, eventId, eventType, status, limit, skip } = req.query;
+    const {
+      agentName,
+      eventId,
+      eventType,
+      status,
+      startDate,
+      endDate,
+      page = 1,
+      limit = 10,
+      sortBy = 'processedAt',
+      sortOrder = 'desc',
+    } = req.query;
+
     const filter = {};
 
     if (agentName) filter.agentName = agentName;
@@ -48,11 +66,30 @@ export const getLogs = async (req, res, next) => {
     if (status) filter.status = status;
     if (eventId && mongoose.Types.ObjectId.isValid(eventId)) filter.eventId = eventId;
 
-    const parsedLimit = parseInt(limit, 10) || 50;
-    const parsedSkip = parseInt(skip, 10) || 0;
+    if (startDate || endDate) {
+      filter.processedAt = {};
+      if (startDate) filter.processedAt.$gte = new Date(startDate);
+      if (endDate) filter.processedAt.$lte = new Date(endDate);
+    }
 
-    const logs = await agentLogService.getAgentLogs(filter, parsedLimit, parsedSkip);
-    res.json(logs);
+    const result = await agentLogService.getAgentLogsPaginated({
+      filter,
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+    });
+
+    res.json({
+      success: true,
+      pagination: {
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        pages: result.pages,
+      },
+      data: result.data,
+    });
   } catch (error) {
     next(error);
   }
@@ -63,11 +100,15 @@ export const getLogsByEvent = async (req, res, next) => {
     const { eventId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
-      return res.status(400).json({ message: 'Invalid eventId format' });
+      return res.status(400).json({ success: false, message: 'Invalid eventId format' });
     }
 
     const logs = await agentLogService.getLogsByEventId(eventId);
-    res.json(logs);
+    res.json({
+      success: true,
+      count: logs.length,
+      data: logs,
+    });
   } catch (error) {
     next(error);
   }

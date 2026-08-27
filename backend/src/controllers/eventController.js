@@ -75,7 +75,19 @@ export const logEvent = async (req, res, next) => {
 
 export const getEvents = async (req, res, next) => {
   try {
-    const { eventType, userId, limit, skip } = req.query;
+    const {
+      eventType,
+      userId,
+      sessionId,
+      isProcessed,
+      startDate,
+      endDate,
+      page = 1,
+      limit = 10,
+      sortBy = 'timestamp',
+      sortOrder = 'desc',
+    } = req.query;
+
     const filter = {};
 
     if (eventType) {
@@ -86,14 +98,63 @@ export const getEvents = async (req, res, next) => {
       filter.userId = userId;
     }
 
-    const parsedLimit = parseInt(limit, 10) || 50;
-    const parsedSkip = parseInt(skip, 10) || 0;
+    if (sessionId) {
+      filter.sessionId = sessionId;
+    }
 
-    const events = await eventService.getEvents(filter, parsedLimit, parsedSkip);
+    if (isProcessed !== undefined) {
+      filter.isProcessed = isProcessed === 'true';
+    }
+
+    if (startDate || endDate) {
+      filter.timestamp = {};
+      if (startDate) filter.timestamp.$gte = new Date(startDate);
+      if (endDate) filter.timestamp.$lte = new Date(endDate);
+    }
+
+    const result = await eventService.getEventsPaginated({
+      filter,
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+    });
+
     res.json({
       success: true,
-      count: events.length,
-      data: events,
+      pagination: {
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        pages: result.pages,
+      },
+      data: result.data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getEventStats = async (req, res, next) => {
+  try {
+    const { startDate, endDate, userId } = req.query;
+    const filter = {};
+
+    if (startDate || endDate) {
+      filter.timestamp = {};
+      if (startDate) filter.timestamp.$gte = new Date(startDate);
+      if (endDate) filter.timestamp.$lte = new Date(endDate);
+    }
+
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      filter.userId = userId;
+    }
+
+    const stats = await eventService.getEventStats(filter);
+
+    res.json({
+      success: true,
+      data: stats,
     });
   } catch (error) {
     next(error);
