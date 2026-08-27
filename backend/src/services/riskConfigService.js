@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import * as riskEventService from './riskEventService.js';
+import riskScoringEngine from './riskScoringEngine.js';
 
 dotenv.config();
 
@@ -152,18 +153,15 @@ export class RiskConfigService {
   }
 
   /**
-   * Evaluate incoming event against configured risk rules
+   * Evaluate incoming event against configured risk rules and calculate risk score & level
    */
   async evaluateAndCreateRiskEvent(eventData) {
     const matchedRules = [];
-    let calculatedScore = 0;
     let primaryReason = 'Risk criteria matched';
 
     for (const rule of this.rules) {
       if (rule.match(eventData)) {
         matchedRules.push(rule);
-        const score = rule.calculateScore(eventData);
-        calculatedScore = Math.max(calculatedScore, score);
         primaryReason = `${rule.name}: ${rule.description}`;
       }
     }
@@ -172,11 +170,15 @@ export class RiskConfigService {
       return { matched: false, message: 'No risk rule matched' };
     }
 
-    // Determine risk status
+    // Calculate score & level using Risk Scoring Engine
+    const scoringResult = await riskScoringEngine.calculateRiskScore(eventData);
+
+    // Create risk payload
     const riskPayload = {
       userId: eventData.userId || null,
       eventType: eventData.eventType,
-      riskScore: calculatedScore,
+      riskScore: scoringResult.riskScore,
+      riskLevel: scoringResult.riskLevel,
       riskAmount: eventData.riskAmount || 0,
       riskReason: eventData.riskReason || primaryReason,
       relatedOrderId: eventData.relatedOrderId || null,
@@ -190,7 +192,8 @@ export class RiskConfigService {
     return {
       matched: true,
       matchedRules: matchedRules.map((r) => r.id),
-      isHighRisk: calculatedScore >= this.config.thresholds.highRiskScore,
+      scoringResult,
+      isHighRisk: scoringResult.riskScore >= this.config.thresholds.highRiskScore,
       riskEvent: savedRiskEvent,
     };
   }

@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 export const RISK_EVENT_TYPES = ['CART_ABANDONED', 'PAYMENT_FAILED', 'ORDER_CANCELLED'];
 export const RISK_STATUSES = ['OPEN', 'REVIEWED', 'RESOLVED'];
+export const RISK_LEVELS = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 
 const riskEventSchema = new mongoose.Schema(
   {
@@ -23,6 +24,14 @@ const riskEventSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: [0, 'riskScore cannot be negative'],
+    },
+    riskLevel: {
+      type: String,
+      enum: {
+        values: RISK_LEVELS,
+        message: '{VALUE} is not a valid risk level',
+      },
+      default: 'LOW',
     },
     riskAmount: {
       type: Number,
