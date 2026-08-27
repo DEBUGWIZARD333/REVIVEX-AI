@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import * as cartService from '../services/cartService';
+import { trackEvent } from '../services/eventTracker';
 
 const CartContext = createContext();
 
@@ -64,6 +65,13 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (product, quantity = 1) => {
     const productId = product._id || product.id;
 
+    // Track ADD_TO_CART event
+    trackEvent({
+      eventType: 'ADD_TO_CART',
+      productId: productId && productId.length === 24 ? productId : null,
+      metadata: { name: product.name, price: product.price, quantity },
+    });
+
     if (user) {
       try {
         setLoading(true);
@@ -123,6 +131,16 @@ export const CartProvider = ({ children }) => {
   };
 
   const removeFromCart = async (cartItemId) => {
+    const targetItem = cartItems.find((item) => item._id === cartItemId);
+    const prodId = targetItem?.product?._id || targetItem?.product?.id;
+
+    // Track REMOVE_CART_ITEM event
+    trackEvent({
+      eventType: 'REMOVE_CART_ITEM',
+      productId: prodId && prodId.length === 24 ? prodId : null,
+      metadata: { cartItemId, name: targetItem?.product?.name },
+    });
+
     if (user) {
       try {
         setLoading(true);

@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { trackEvent } from '../services/eventTracker';
 import {
   ShieldCheck,
   ArrowLeft,
@@ -32,6 +33,16 @@ const Checkout = () => {
   const taxCost = subtotal * 0.08;
   const grandTotal = subtotal + shippingCost + taxCost;
 
+  // Track CHECKOUT_STARTED event on mount
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      trackEvent({
+        eventType: 'CHECKOUT_STARTED',
+        metadata: { itemCount: cartItems.length, subtotal, grandTotal },
+      });
+    }
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -61,6 +72,12 @@ const Checkout = () => {
   const onSubmit = (data) => {
     setIsSubmitting(true);
     
+    // Track PAYMENT_INITIATED event
+    trackEvent({
+      eventType: 'PAYMENT_INITIATED',
+      metadata: { paymentMethod, amount: grandTotal },
+    });
+
     // Simulate payment processing & order creation
     setTimeout(() => {
       const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -106,6 +123,12 @@ const Checkout = () => {
         items: [...cartItems],
         totalAmount: grandTotal,
       };
+
+      // Track PAYMENT_SUCCESS event
+      trackEvent({
+        eventType: 'PAYMENT_SUCCESS',
+        metadata: { orderId, totalAmount: grandTotal, paymentMethod },
+      });
 
       setOrderDetails(orderData);
       setIsSubmitting(false);

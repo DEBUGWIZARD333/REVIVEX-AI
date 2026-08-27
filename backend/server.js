@@ -5,6 +5,7 @@ import connectDB from './src/config/db.js';
 import authRoutes from './src/routes/authRoutes.js';
 import productRoutes from './src/routes/productRoutes.js';
 import cartRoutes from './src/routes/cartRoutes.js';
+import eventRoutes from './src/routes/eventRoutes.js';
 import { errorHandler, notFound } from './src/middlewares/errorMiddleware.js';
 
 // Load env vars
@@ -23,6 +24,7 @@ app.use(cors());
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/events', eventRoutes);
 
 // Error handling middleware
 app.use(notFound);

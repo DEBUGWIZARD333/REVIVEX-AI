@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Star, ArrowLeft, ShoppingCart, Check, X } from 'lucide-react';
 import * as productService from '../services/productService';
 import { useCart } from '../context/CartContext';
+import { trackEvent } from '../services/eventTracker';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -21,6 +22,13 @@ const ProductDetail = () => {
         const data = await productService.getProductById(id);
         setProduct(data);
         setError(null);
+        
+        // Track PRODUCT_VIEWED event
+        trackEvent({
+          eventType: 'PRODUCT_VIEWED',
+          productId: id,
+          metadata: { name: data.name, price: data.price, category: data.category },
+        });
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch product details.');
       } finally {
