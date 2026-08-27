@@ -9,6 +9,7 @@ import ProductList from '../pages/ProductList';
 import ProductDetail from '../pages/ProductDetail';
 import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
+import MonitoringDashboard from '../pages/MonitoringDashboard';
 
 const AppRoutes = () => {
   return (
@@ -23,14 +24,15 @@ const AppRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
 
-      {/* Protected Routes */}
+      {/* Protected User Routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<MonitoringDashboard />} />
+        <Route path="/user-dashboard" element={<Dashboard />} />
       </Route>
 
-      {/* Admin Routes (Example) */}
+      {/* Admin Protected Routes */}
       <Route element={<ProtectedRoute adminOnly={true} />}>
-        {/* <Route path="/admin" element={<AdminDashboard />} /> */}
+        <Route path="/admin/monitoring" element={<MonitoringDashboard />} />
       </Route>
       
       {/* 404 Route */}
