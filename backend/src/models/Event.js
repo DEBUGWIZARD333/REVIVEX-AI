@@ -55,10 +55,9 @@ const eventSchema = new mongoose.Schema(
   }
 );
 
-// Indexes on userId, eventType, and isProcessed for optimized query performance
+// Indexes on userId and eventType for optimized query performance
 eventSchema.index({ userId: 1 });
 eventSchema.index({ eventType: 1 });
-eventSchema.index({ isProcessed: 1 });
 eventSchema.index({ userId: 1, eventType: 1 });
 eventSchema.index({ timestamp: -1 });
 

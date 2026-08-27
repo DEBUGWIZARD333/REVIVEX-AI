@@ -8,6 +8,7 @@ import cartRoutes from './src/routes/cartRoutes.js';
 import eventRoutes from './src/routes/eventRoutes.js';
 import agentLogRoutes from './src/routes/agentLogRoutes.js';
 import monitoringRoutes from './src/routes/monitoringRoutes.js';
+import riskEventRoutes from './src/routes/riskEventRoutes.js';
 import { startMonitoringAgent } from './src/services/monitoringAgentService.js';
 import { errorHandler, notFound } from './src/middlewares/errorMiddleware.js';
 
@@ -30,6 +31,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/agent-logs', agentLogRoutes);
 app.use('/api/monitoring', monitoringRoutes);
+app.use('/api/risk-events', riskEventRoutes);
 
 // Error handling middleware
 app.use(notFound);
