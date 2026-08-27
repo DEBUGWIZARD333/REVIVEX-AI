@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { trackEvent } from '../services/eventTracker';
+import {
+  trackCheckoutStarted,
+  trackPaymentInitiated,
+  trackPaymentSuccess,
+  trackPaymentFailed,
+} from '../services/eventTracker';
 import {
   ShieldCheck,
   ArrowLeft,
@@ -36,10 +41,7 @@ const Checkout = () => {
   // Track CHECKOUT_STARTED event on mount
   useEffect(() => {
     if (cartItems.length > 0) {
-      trackEvent({
-        eventType: 'CHECKOUT_STARTED',
-        metadata: { itemCount: cartItems.length, subtotal, grandTotal },
-      });
+      trackCheckoutStarted({ itemCount: cartItems.length, subtotal, grandTotal });
     }
   }, []);
 
@@ -72,68 +74,68 @@ const Checkout = () => {
   const onSubmit = (data) => {
     setIsSubmitting(true);
     
-    // Track PAYMENT_INITIATED event
-    trackEvent({
-      eventType: 'PAYMENT_INITIATED',
-      metadata: { paymentMethod, amount: grandTotal },
-    });
+    // Track PAYMENT_INITIATED event with deduplication
+    trackPaymentInitiated({ paymentMethod, amount: grandTotal });
 
     // Simulate payment processing & order creation
     setTimeout(() => {
-      const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
-      const orderData = {
-        orderId,
-        date: new Date().toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-        shipping: {
-          fullName: data.shipping_fullName,
-          mobile: data.shipping_mobile,
-          email: data.shipping_email,
-          address1: data.shipping_address1,
-          address2: data.shipping_address2,
-          city: data.shipping_city,
-          state: data.shipping_state,
-          pincode: data.shipping_pincode,
-        },
-        billing: sameAsShipping
-          ? {
-              fullName: data.shipping_fullName,
-              mobile: data.shipping_mobile,
-              email: data.shipping_email,
-              address1: data.shipping_address1,
-              address2: data.shipping_address2,
-              city: data.shipping_city,
-              state: data.shipping_state,
-              pincode: data.shipping_pincode,
-            }
-          : {
-              fullName: data.billing_fullName,
-              mobile: data.billing_mobile,
-              email: data.billing_email,
-              address1: data.billing_address1,
-              address2: data.billing_address2,
-              city: data.billing_city,
-              state: data.billing_state,
-              pincode: data.billing_pincode,
-            },
-        paymentMethod,
-        items: [...cartItems],
-        totalAmount: grandTotal,
-      };
+      try {
+        const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+        const orderData = {
+          orderId,
+          date: new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          shipping: {
+            fullName: data.shipping_fullName,
+            mobile: data.shipping_mobile,
+            email: data.shipping_email,
+            address1: data.shipping_address1,
+            address2: data.shipping_address2,
+            city: data.shipping_city,
+            state: data.shipping_state,
+            pincode: data.shipping_pincode,
+          },
+          billing: sameAsShipping
+            ? {
+                fullName: data.shipping_fullName,
+                mobile: data.shipping_mobile,
+                email: data.shipping_email,
+                address1: data.shipping_address1,
+                address2: data.shipping_address2,
+                city: data.shipping_city,
+                state: data.shipping_state,
+                pincode: data.shipping_pincode,
+              }
+            : {
+                fullName: data.billing_fullName,
+                mobile: data.billing_mobile,
+                email: data.billing_email,
+                address1: data.billing_address1,
+                address2: data.billing_address2,
+                city: data.billing_city,
+                state: data.billing_state,
+                pincode: data.billing_pincode,
+              },
+          paymentMethod,
+          items: [...cartItems],
+          totalAmount: grandTotal,
+        };
 
-      // Track PAYMENT_SUCCESS event
-      trackEvent({
-        eventType: 'PAYMENT_SUCCESS',
-        metadata: { orderId, totalAmount: grandTotal, paymentMethod },
-      });
+        // Track PAYMENT_SUCCESS event
+        trackPaymentSuccess({ orderId, totalAmount: grandTotal, paymentMethod });
 
-      setOrderDetails(orderData);
-      setIsSubmitting(false);
-      setOrderComplete(true);
-      clearCart();
+        setOrderDetails(orderData);
+        setIsSubmitting(false);
+        setOrderComplete(true);
+        clearCart();
+      } catch (err) {
+        // Track PAYMENT_FAILED event
+        trackPaymentFailed({ reason: err.message, amount: grandTotal });
+        setIsSubmitting(false);
+      }
     }, 1500);
   };
 
