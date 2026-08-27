@@ -6,36 +6,68 @@ export const logEvent = async (req, res, next) => {
   try {
     const { eventType, sessionId, productId, metadata, timestamp } = req.body;
     
-    // Extract userId from authenticated request if present, or from body
+    // Extract userId from authenticated token if present, or from request body
     const userId = req.user ? req.user._id : req.body.userId || null;
 
+    // Payload validation
     if (!eventType) {
-      return res.status(400).json({ message: 'eventType is required' });
+      return res.status(400).json({
+        success: false,
+        message: 'eventType is required in request body',
+      });
     }
 
     if (!EVENT_TYPES.includes(eventType)) {
       return res.status(400).json({
-        message: `Invalid eventType. Allowed types: ${EVENT_TYPES.join(', ')}`,
+        success: false,
+        message: `Invalid eventType '${eventType}'. Allowed types: ${EVENT_TYPES.join(', ')}`,
       });
+    }
+
+    // Validate userId format if provided
+    let validUserId = null;
+    if (userId) {
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        validUserId = userId;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid userId format. Must be a valid 24-character hex ObjectId string',
+        });
+      }
     }
 
     // Validate productId format if provided
     let validProductId = null;
-    if (productId && mongoose.Types.ObjectId.isValid(productId)) {
-      validProductId = productId;
+    if (productId) {
+      if (mongoose.Types.ObjectId.isValid(productId)) {
+        validProductId = productId;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid productId format. Must be a valid 24-character hex ObjectId string',
+        });
+      }
     }
 
     const eventPayload = {
       eventType,
-      userId: userId && mongoose.Types.ObjectId.isValid(userId) ? userId : null,
+      userId: validUserId,
       sessionId: sessionId || req.headers['x-session-id'] || null,
       productId: validProductId,
       metadata: metadata || {},
       timestamp: timestamp ? new Date(timestamp) : new Date(),
     };
 
+    // Save event in MongoDB Event collection
     const savedEvent = await eventService.createEvent(eventPayload);
-    res.status(201).json(savedEvent);
+
+    // Return structured success response
+    res.status(201).json({
+      success: true,
+      message: 'Event tracked successfully',
+      data: savedEvent,
+    });
   } catch (error) {
     next(error);
   }
@@ -58,7 +90,11 @@ export const getEvents = async (req, res, next) => {
     const parsedSkip = parseInt(skip, 10) || 0;
 
     const events = await eventService.getEvents(filter, parsedLimit, parsedSkip);
-    res.json(events);
+    res.json({
+      success: true,
+      count: events.length,
+      data: events,
+    });
   } catch (error) {
     next(error);
   }
@@ -69,11 +105,15 @@ export const getUserEvents = async (req, res, next) => {
     const { userId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Invalid User ID format' });
+      return res.status(400).json({ success: false, message: 'Invalid User ID format' });
     }
 
     const events = await eventService.getEventsByUserId(userId);
-    res.json(events);
+    res.json({
+      success: true,
+      count: events.length,
+      data: events,
+    });
   } catch (error) {
     next(error);
   }
