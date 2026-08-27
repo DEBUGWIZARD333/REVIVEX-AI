@@ -6,6 +6,7 @@ import authRoutes from './src/routes/authRoutes.js';
 import productRoutes from './src/routes/productRoutes.js';
 import cartRoutes from './src/routes/cartRoutes.js';
 import eventRoutes from './src/routes/eventRoutes.js';
+import agentLogRoutes from './src/routes/agentLogRoutes.js';
 import { errorHandler, notFound } from './src/middlewares/errorMiddleware.js';
 
 // Load env vars
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/agent-logs', agentLogRoutes);
 
 // Error handling middleware
 app.use(notFound);
