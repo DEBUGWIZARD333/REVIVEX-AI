@@ -26,6 +26,9 @@ export const DecisionAgentStateAnnotation = Annotation.Root({
   customerHistory: Annotation({
     reducer: (x, y) => (y ? { ...x, ...y } : x ?? {}),
   }),
+  customerAnalysis: Annotation({
+    reducer: (x, y) => (y ? { ...x, ...y } : x ?? {}),
+  }),
   cartValue: Annotation({
     reducer: (x, y) => y ?? x ?? 0,
   }),
