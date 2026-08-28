@@ -208,6 +208,23 @@ export class RiskConfigService {
         cartValue: workflowState.cartValue || savedRiskEvent.riskAmount || 0,
         customerHistory: workflowState.customerHistory || {},
       });
+
+      // Trigger Recovery Workflow Engine (Recovery Link, Coupon, Email, Notification)
+      try {
+        const { globalRecoveryWorkflowEngine } = await import('./recoveryWorkflowEngine.js');
+        await globalRecoveryWorkflowEngine.executeWorkflow({
+          userId: savedRiskEvent.userId,
+          riskEventId: savedRiskEvent._id,
+          decisionId: decisionOutcome._id,
+          eventType: savedRiskEvent.eventType,
+          riskScore: savedRiskEvent.riskScore,
+          riskLevel: savedRiskEvent.riskLevel,
+          riskAmount: savedRiskEvent.riskAmount,
+          relatedCartId: savedRiskEvent.relatedCartId,
+        });
+      } catch (recoveryErr) {
+        console.error('[RiskConfigService] Error triggering recovery workflow:', recoveryErr.message);
+      }
     } catch (graphErr) {
       console.error('[RiskConfigService] Error triggering decision workflow:', graphErr.message);
     }
