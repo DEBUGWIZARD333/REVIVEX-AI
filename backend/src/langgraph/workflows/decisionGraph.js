@@ -4,7 +4,7 @@ import { detectRiskNode } from '../nodes/detectRiskNode.js';
 import { fetchCustomerHistoryNode } from '../nodes/fetchCustomerHistoryNode.js';
 import { customerAnalysisNode } from '../nodes/customerAnalysisNode.js';
 import { evaluateRiskContextNode } from '../nodes/evaluateRiskContextNode.js';
-import { determineDecisionNode } from '../nodes/determineDecisionNode.js';
+import { decisionEngineNode } from '../nodes/decisionEngineNode.js';
 import { executeActionNode } from '../nodes/executeActionNode.js';
 
 /**
@@ -20,7 +20,7 @@ export const createDecisionGraph = () => {
     .addNode('fetch_history', fetchCustomerHistoryNode)
     .addNode('customer_analysis', customerAnalysisNode)
     .addNode('evaluate_context', evaluateRiskContextNode)
-    .addNode('determine_decision', determineDecisionNode)
+    .addNode('determine_decision', decisionEngineNode)
     .addNode('execute_action', executeActionNode)
 
     // 2. Add Sequential Edges

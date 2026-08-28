@@ -44,6 +44,9 @@ export const DecisionAgentStateAnnotation = Annotation.Root({
   confidenceScore: Annotation({
     reducer: (x, y) => y ?? x ?? 0.85,
   }),
+  reasoning: Annotation({
+    reducer: (x, y) => y ?? x ?? '',
+  }),
   actionResult: Annotation({
     reducer: (x, y) => (y ? { ...x, ...y } : x ?? {}),
   }),
