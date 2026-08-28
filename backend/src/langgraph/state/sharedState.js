@@ -14,6 +14,15 @@ export const DecisionAgentStateAnnotation = Annotation.Root({
   riskEvent: Annotation({
     reducer: (x, y) => (y ? { ...x, ...y } : x ?? null),
   }),
+  customerInfo: Annotation({
+    reducer: (x, y) => (y ? { ...x, ...y } : x ?? {}),
+  }),
+  cartInfo: Annotation({
+    reducer: (x, y) => (y ? { ...x, ...y } : x ?? {}),
+  }),
+  isInputValid: Annotation({
+    reducer: (x, y) => y ?? x ?? true,
+  }),
   customerHistory: Annotation({
     reducer: (x, y) => (y ? { ...x, ...y } : x ?? {}),
   }),
