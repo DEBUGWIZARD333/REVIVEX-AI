@@ -18,6 +18,7 @@ import recoveryLinkRoutes from './src/routes/recoveryLinkRoutes.js';
 import couponRoutes from './src/routes/couponRoutes.js';
 import emailRoutes from './src/routes/emailRoutes.js';
 import notificationRoutes from './src/routes/notificationRoutes.js';
+import recoveryWorkflowRoutes from './src/routes/recoveryWorkflowRoutes.js';
 import { startMonitoringAgent } from './src/services/monitoringAgentService.js';
 import { startAbandonmentDetectorJob } from './src/services/cartAbandonmentService.js';
 import { startRecoveryAgentWorker } from './src/services/recoveryAgentService.js';
@@ -53,6 +54,7 @@ app.use('/api/recovery-link', recoveryLinkRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/recovery-workflow', recoveryWorkflowRoutes);
 
 // Error handling middleware
 app.use(notFound);
