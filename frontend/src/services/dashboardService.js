@@ -110,3 +110,47 @@ export const fetchDecisionsFeed = async (params = {}) => {
   });
   return response.data;
 };
+
+// Revenue Recovery Dashboard APIs
+export const fetchRecoveryMetrics = async () => {
+  const response = await axios.get(`${BASE_URL}/recovery-metrics`, getAuthHeaders());
+  return response.data;
+};
+
+export const fetchRecoveryEventsFeed = async (params = {}) => {
+  const response = await axios.get(`${BASE_URL}/recovery-events`, {
+    ...getAuthHeaders(),
+    params: {
+      limit: 10,
+      sortBy: 'executedAt',
+      sortOrder: 'desc',
+      ...params,
+    },
+  });
+  return response.data;
+};
+
+export const fetchCouponsFeed = async (params = {}) => {
+  const response = await axios.get(`${BASE_URL}/coupons`, {
+    ...getAuthHeaders(),
+    params: {
+      limit: 10,
+      ...params,
+    },
+  });
+  return response.data;
+};
+
+export const fetchEmailLogsFeed = async (params = {}) => {
+  const response = await axios.get(`${BASE_URL}/agent-logs`, {
+    ...getAuthHeaders(),
+    params: {
+      limit: 10,
+      eventType: 'EMAIL_CART_REMINDER',
+      sortBy: 'processedAt',
+      sortOrder: 'desc',
+      ...params,
+    },
+  });
+  return response.data;
+};
