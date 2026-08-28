@@ -189,12 +189,36 @@ export class RiskConfigService {
 
     const savedRiskEvent = await riskEventService.createRiskEvent(riskPayload);
 
+    // Trigger LangGraph Decision Workflow automatically
+    let decisionOutcome = null;
+    try {
+      const { runDecisionWorkflow } = await import('../langgraph/workflows/decisionGraph.js');
+      const { createDecisionEvent } = await import('./decisionService.js');
+
+      const workflowState = await runDecisionWorkflow(savedRiskEvent);
+
+      decisionOutcome = await createDecisionEvent({
+        userId: savedRiskEvent.userId,
+        riskEventId: savedRiskEvent._id,
+        decisionType: workflowState.decisionType || 'REMINDER',
+        confidenceScore: workflowState.confidenceScore || 0.85,
+        riskReason: savedRiskEvent.riskReason,
+        actionTaken: workflowState.actionResult?.details || `Executed ${workflowState.decisionType}`,
+        status: workflowState.status === 'COMPLETED' ? 'EXECUTED' : 'PROCESSING',
+        cartValue: workflowState.cartValue || savedRiskEvent.riskAmount || 0,
+        customerHistory: workflowState.customerHistory || {},
+      });
+    } catch (graphErr) {
+      console.error('[RiskConfigService] Error triggering decision workflow:', graphErr.message);
+    }
+
     return {
       matched: true,
       matchedRules: matchedRules.map((r) => r.id),
       scoringResult,
       isHighRisk: scoringResult.riskScore >= this.config.thresholds.highRiskScore,
       riskEvent: savedRiskEvent,
+      decisionOutcome,
     };
   }
 }
