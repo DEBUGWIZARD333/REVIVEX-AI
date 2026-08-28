@@ -19,6 +19,9 @@ import couponRoutes from './src/routes/couponRoutes.js';
 import emailRoutes from './src/routes/emailRoutes.js';
 import notificationRoutes from './src/routes/notificationRoutes.js';
 import recoveryWorkflowRoutes from './src/routes/recoveryWorkflowRoutes.js';
+import recoveryAnalyticsRoutes from './src/routes/recoveryAnalyticsRoutes.js';
+import { getRecoveryEvents, getRecoveryMetrics, getRecoverySummary } from './src/controllers/recoveryAnalyticsController.js';
+import { protect } from './src/middlewares/authMiddleware.js';
 import { startMonitoringAgent } from './src/services/monitoringAgentService.js';
 import { startAbandonmentDetectorJob } from './src/services/cartAbandonmentService.js';
 import { startRecoveryAgentWorker } from './src/services/recoveryAgentService.js';
@@ -55,6 +58,12 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/recovery-workflow', recoveryWorkflowRoutes);
+
+// Mount Recovery Analytics APIs
+app.use('/api/recovery-analytics', recoveryAnalyticsRoutes);
+app.get('/api/recovery-events', protect, getRecoveryEvents);
+app.get('/api/recovery-metrics', protect, getRecoveryMetrics);
+app.get('/api/recovery-summary', protect, getRecoverySummary);
 
 // Error handling middleware
 app.use(notFound);
