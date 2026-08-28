@@ -95,7 +95,13 @@ const Navbar = () => {
                   to="/dashboard"
                   className="hidden sm:block text-slate-600 hover:text-brand-600 font-medium text-sm transition"
                 >
-                  Dashboard
+                  Events
+                </Link>
+                <Link
+                  to="/risk-dashboard"
+                  className="hidden sm:block text-rose-600 hover:text-rose-700 font-bold text-sm transition bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200"
+                >
+                  Risk Dashboard
                 </Link>
                 <div className="flex items-center space-x-2 text-slate-700 bg-slate-100 px-3 py-1 rounded-full text-sm">
                   <UserIcon size={16} />

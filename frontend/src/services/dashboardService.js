@@ -49,3 +49,45 @@ export const fetchMonitoringStatus = async () => {
   const response = await axios.get(`${BASE_URL}/monitoring/status`, getAuthHeaders());
   return response.data;
 };
+
+// Risk Dashboard APIs
+export const fetchRiskStats = async () => {
+  const response = await axios.get(`${BASE_URL}/risk-events/stats`, getAuthHeaders());
+  return response.data;
+};
+
+export const fetchRiskEvents = async (params = {}) => {
+  const response = await axios.get(`${BASE_URL}/risk-events`, {
+    ...getAuthHeaders(),
+    params: {
+      limit: 10,
+      sortBy: 'detectedAt',
+      sortOrder: 'desc',
+      ...params,
+    },
+  });
+  return response.data;
+};
+
+export const fetchHighRiskEvents = async (params = {}) => {
+  const response = await axios.get(`${BASE_URL}/risk-events`, {
+    ...getAuthHeaders(),
+    params: {
+      limit: 10,
+      minRiskScore: 66,
+      sortBy: 'detectedAt',
+      sortOrder: 'desc',
+      ...params,
+    },
+  });
+  return response.data;
+};
+
+export const updateRiskEventStatus = async (id, status) => {
+  const response = await axios.put(
+    `${BASE_URL}/risk-events/${id}/status`,
+    { status },
+    getAuthHeaders()
+  );
+  return response.data;
+};
