@@ -14,6 +14,7 @@ import cartAbandonmentRoutes from './src/routes/cartAbandonmentRoutes.js';
 import orderRoutes from './src/routes/orderRoutes.js';
 import decisionRoutes from './src/routes/decisionRoutes.js';
 import recoveryAgentRoutes from './src/routes/recoveryAgentRoutes.js';
+import recoveryLinkRoutes from './src/routes/recoveryLinkRoutes.js';
 import { startMonitoringAgent } from './src/services/monitoringAgentService.js';
 import { startAbandonmentDetectorJob } from './src/services/cartAbandonmentService.js';
 import { startRecoveryAgentWorker } from './src/services/recoveryAgentService.js';
@@ -45,6 +46,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/decisions', decisionRoutes);
 app.use('/api/decision-stats', decisionRoutes);
 app.use('/api/recovery-agent', recoveryAgentRoutes);
+app.use('/api/recovery-link', recoveryLinkRoutes);
 
 // Error handling middleware
 app.use(notFound);
