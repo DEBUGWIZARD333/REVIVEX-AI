@@ -70,8 +70,11 @@ export const getRiskEvents = async (req, res, next) => {
   try {
     const {
       eventType,
-      userId,
+      riskLevel,
       status,
+      userId,
+      minRiskScore,
+      maxRiskScore,
       startDate,
       endDate,
       page = 1,
@@ -83,8 +86,15 @@ export const getRiskEvents = async (req, res, next) => {
     const filter = {};
 
     if (eventType) filter.eventType = eventType;
-    if (status) filter.status = status;
+    if (riskLevel) filter.riskLevel = riskLevel.toUpperCase();
+    if (status) filter.status = status.toUpperCase();
     if (userId && mongoose.Types.ObjectId.isValid(userId)) filter.userId = userId;
+
+    if (minRiskScore || maxRiskScore) {
+      filter.riskScore = {};
+      if (minRiskScore) filter.riskScore.$gte = parseFloat(minRiskScore);
+      if (maxRiskScore) filter.riskScore.$lte = parseFloat(maxRiskScore);
+    }
 
     if (startDate || endDate) {
       filter.detectedAt = {};

@@ -50,24 +50,70 @@ export const updateRiskEventStatus = async (id, status) => {
   ).populate('userId', 'name email');
 };
 
+/**
+ * Aggregated statistics for Risk Dashboard
+ * Returns Total Risk Events, Total Risk Amount, High Risk Events, Critical Risk Events, and Revenue Leakage Summary.
+ */
 export const getRiskStats = async () => {
-  const aggregation = await RiskEvent.aggregate([
+  const totalRiskEvents = await RiskEvent.countDocuments({});
+  
+  // Total Risk Amount across all events
+  const totalAmountAggregation = await RiskEvent.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalAmount: { $sum: '$riskAmount' },
+      },
+    },
+  ]);
+  const totalRiskAmount = totalAmountAggregation[0]?.totalAmount || 0;
+
+  // High Risk Events (score >= 66 or riskLevel === 'HIGH')
+  const highRiskEvents = await RiskEvent.countDocuments({
+    $or: [{ riskLevel: 'HIGH' }, { riskScore: { $gte: 66, $lt: 86 } }],
+  });
+
+  // Critical Risk Events (score >= 86 or riskLevel === 'CRITICAL')
+  const criticalRiskEvents = await RiskEvent.countDocuments({
+    $or: [{ riskLevel: 'CRITICAL' }, { riskScore: { $gte: 86 } }],
+  });
+
+  // Revenue Leakage Summary broken down by eventType
+  const leakageAggregation = await RiskEvent.aggregate([
     {
       $group: {
         _id: '$eventType',
         count: { $sum: 1 },
-        totalAmountAtRisk: { $sum: '$riskAmount' },
-        avgRiskScore: { $avg: '$riskScore' },
+        totalLeakageAmount: { $sum: '$riskAmount' },
       },
     },
   ]);
 
-  const openCount = await RiskEvent.countDocuments({ status: 'OPEN' });
-  const totalCount = await RiskEvent.countDocuments({});
+  let abandonedCartValue = 0;
+  let failedPaymentValue = 0;
+  let cancelledOrderValue = 0;
+
+  leakageAggregation.forEach((item) => {
+    if (item._id === 'CART_ABANDONED') abandonedCartValue = item.totalLeakageAmount;
+    if (item._id === 'PAYMENT_FAILED') failedPaymentValue = item.totalLeakageAmount;
+    if (item._id === 'ORDER_CANCELLED') cancelledOrderValue = item.totalLeakageAmount;
+  });
+
+  const totalRevenueLeakage = parseFloat(
+    (abandonedCartValue + failedPaymentValue + cancelledOrderValue).toFixed(2)
+  );
 
   return {
-    openRiskEvents: openCount,
-    totalRiskEventsTracked: totalCount,
-    breakdown: aggregation,
+    totalRiskEvents,
+    totalRiskAmount: parseFloat(totalRiskAmount.toFixed(2)),
+    highRiskEvents,
+    criticalRiskEvents,
+    revenueLeakageSummary: {
+      abandonedCartValue: parseFloat(abandonedCartValue.toFixed(2)),
+      failedPaymentValue: parseFloat(failedPaymentValue.toFixed(2)),
+      cancelledOrderValue: parseFloat(cancelledOrderValue.toFixed(2)),
+      totalRevenueLeakage,
+    },
+    breakdownByEventType: leakageAggregation,
   };
 };
