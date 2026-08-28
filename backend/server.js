@@ -13,8 +13,10 @@ import riskConfigRoutes from './src/routes/riskConfigRoutes.js';
 import cartAbandonmentRoutes from './src/routes/cartAbandonmentRoutes.js';
 import orderRoutes from './src/routes/orderRoutes.js';
 import decisionRoutes from './src/routes/decisionRoutes.js';
+import recoveryAgentRoutes from './src/routes/recoveryAgentRoutes.js';
 import { startMonitoringAgent } from './src/services/monitoringAgentService.js';
 import { startAbandonmentDetectorJob } from './src/services/cartAbandonmentService.js';
+import { startRecoveryAgentWorker } from './src/services/recoveryAgentService.js';
 import { errorHandler, notFound } from './src/middlewares/errorMiddleware.js';
 
 // Load env vars
@@ -42,6 +44,7 @@ app.use('/api/cart-abandonment', cartAbandonmentRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/decisions', decisionRoutes);
 app.use('/api/decision-stats', decisionRoutes);
+app.use('/api/recovery-agent', recoveryAgentRoutes);
 
 // Error handling middleware
 app.use(notFound);
@@ -55,4 +58,6 @@ app.listen(PORT, () => {
   startMonitoringAgent(5000);
   // Start Cart Abandonment Detector scheduled job (every 10 minutes)
   startAbandonmentDetectorJob(10);
+  // Start Recovery Agent Core worker loop (every 10 seconds)
+  startRecoveryAgentWorker(10000);
 });
