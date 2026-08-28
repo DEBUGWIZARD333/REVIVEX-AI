@@ -74,7 +74,6 @@ const orderSchema = new mongoose.Schema(
 
 // Indexes for query performance
 orderSchema.index({ userId: 1 });
-orderSchema.index({ orderId: 1 }, { unique: true });
 orderSchema.index({ status: 1 });
 
 const Order = mongoose.model('Order', orderSchema);
