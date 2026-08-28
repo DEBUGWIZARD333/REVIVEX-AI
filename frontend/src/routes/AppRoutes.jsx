@@ -11,6 +11,7 @@ import Cart from '../pages/Cart';
 import Checkout from '../pages/Checkout';
 import MonitoringDashboard from '../pages/MonitoringDashboard';
 import RiskMonitoringDashboard from '../pages/RiskMonitoringDashboard';
+import DecisionDashboard from '../pages/DecisionDashboard';
 
 const AppRoutes = () => {
   return (
@@ -29,6 +30,7 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<MonitoringDashboard />} />
         <Route path="/risk-dashboard" element={<RiskMonitoringDashboard />} />
+        <Route path="/decision-dashboard" element={<DecisionDashboard />} />
         <Route path="/user-dashboard" element={<Dashboard />} />
       </Route>
 
@@ -36,6 +38,7 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute adminOnly={true} />}>
         <Route path="/admin/monitoring" element={<MonitoringDashboard />} />
         <Route path="/admin/risk-monitoring" element={<RiskMonitoringDashboard />} />
+        <Route path="/admin/decision-dashboard" element={<DecisionDashboard />} />
       </Route>
       
       {/* 404 Route */}

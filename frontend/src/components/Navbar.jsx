@@ -103,6 +103,12 @@ const Navbar = () => {
                 >
                   Risk Dashboard
                 </Link>
+                <Link
+                  to="/decision-dashboard"
+                  className="hidden sm:block text-purple-600 hover:text-purple-700 font-bold text-sm transition bg-purple-50 px-2.5 py-1 rounded-full border border-purple-200"
+                >
+                  Decision AI
+                </Link>
                 <div className="flex items-center space-x-2 text-slate-700 bg-slate-100 px-3 py-1 rounded-full text-sm">
                   <UserIcon size={16} />
                   <span className="font-semibold">{user.name}</span>

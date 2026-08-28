@@ -47,6 +47,16 @@ const decisionEventSchema = new mongoose.Schema(
       min: [0.0, 'confidenceScore cannot be less than 0.0'],
       max: [1.0, 'confidenceScore cannot be greater than 1.0'],
     },
+    actionTaken: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    status: {
+      type: String,
+      enum: ['RECEIVED', 'PROCESSING', 'EXECUTED', 'COMPLETED', 'FAILED'],
+      default: 'EXECUTED',
+    },
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt

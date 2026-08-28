@@ -91,3 +91,22 @@ export const updateRiskEventStatus = async (id, status) => {
   );
   return response.data;
 };
+
+// Decision Agent Dashboard APIs
+export const fetchDecisionStats = async () => {
+  const response = await axios.get(`${BASE_URL}/decision-stats`, getAuthHeaders());
+  return response.data;
+};
+
+export const fetchDecisionsFeed = async (params = {}) => {
+  const response = await axios.get(`${BASE_URL}/decisions`, {
+    ...getAuthHeaders(),
+    params: {
+      limit: 15,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+      ...params,
+    },
+  });
+  return response.data;
+};
