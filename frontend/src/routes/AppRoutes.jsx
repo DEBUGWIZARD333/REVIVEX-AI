@@ -13,6 +13,7 @@ import MonitoringDashboard from '../pages/MonitoringDashboard';
 import RiskMonitoringDashboard from '../pages/RiskMonitoringDashboard';
 import DecisionDashboard from '../pages/DecisionDashboard';
 import RevenueRecoveryDashboard from '../pages/RevenueRecoveryDashboard';
+import RecoveryLinkHandler from '../pages/RecoveryLinkHandler';
 
 const AppRoutes = () => {
   return (
@@ -23,6 +24,7 @@ const AppRoutes = () => {
       <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />
+      <Route path="/recover/cart/:token" element={<RecoveryLinkHandler />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
