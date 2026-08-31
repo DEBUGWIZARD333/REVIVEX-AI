@@ -14,6 +14,7 @@ import RiskMonitoringDashboard from '../pages/RiskMonitoringDashboard';
 import DecisionDashboard from '../pages/DecisionDashboard';
 import RevenueRecoveryDashboard from '../pages/RevenueRecoveryDashboard';
 import RecoveryLinkHandler from '../pages/RecoveryLinkHandler';
+import TestingDashboard from '../pages/TestingDashboard';
 
 const AppRoutes = () => {
   return (
@@ -25,6 +26,8 @@ const AppRoutes = () => {
       <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/recover/cart/:token" element={<RecoveryLinkHandler />} />
+      <Route path="/testing-dashboard" element={<TestingDashboard />} />
+      <Route path="/testing" element={<TestingDashboard />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
@@ -44,6 +47,7 @@ const AppRoutes = () => {
         <Route path="/admin/risk-monitoring" element={<RiskMonitoringDashboard />} />
         <Route path="/admin/decision-dashboard" element={<DecisionDashboard />} />
         <Route path="/admin/revenue-recovery" element={<RevenueRecoveryDashboard />} />
+        <Route path="/admin/testing" element={<TestingDashboard />} />
       </Route>
       
       {/* 404 Route */}
