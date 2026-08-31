@@ -19,6 +19,7 @@ import { globalRecoveryWorkflowEngine } from './recoveryWorkflowEngine.js';
 import * as couponService from './couponService.js';
 import * as recoveryLinkService from './recoveryLinkService.js';
 import { globalRiskDetectionValidator } from './riskDetectionValidator.js';
+import { globalDecisionAgentValidator } from './decisionAgentValidator.js';
 
 /**
  * Helper to log steps into both memory & TestResult Mongo document
@@ -723,6 +724,62 @@ export const scenarioTestRiskDetectionAgent = async (suiteRunId, testDoc = null)
 };
 
 /**
+ * SCENARIO 8: Decision Agent Testing & Explainability Validation
+ */
+export const scenarioTestDecisionAgent = async (suiteRunId, testDoc = null) => {
+  const startTime = Date.now();
+  const logs = [];
+  addLog(logs, 'INFO', 'Starting scenario: Decision Agent Testing & Explainability Validation');
+
+  const doc = testDoc || new TestResult({
+    suiteRunId: suiteRunId || `SUITE-${Date.now()}`,
+    scenarioId: 'DECISION_AGENT_TESTING',
+    scenarioName: 'Decision Agent Testing',
+    status: 'RUNNING',
+    startedAt: new Date(),
+    logs,
+  });
+
+  doc.status = 'RUNNING';
+  await doc.save();
+
+  try {
+    addLog(logs, 'INFO', 'Executing Decision Agent Test Suite across synthetic customer profiles...');
+    const testReport = await globalDecisionAgentValidator.runDecisionTestSuite(logs);
+
+    addLog(logs, testReport.success ? 'SUCCESS' : 'WARN', `Decision Agent Test Suite completed. Accuracy: ${testReport.accuracyRate}% (${testReport.passedCount}/${testReport.totalProfiles} passed)`, testReport);
+
+    if (!testReport.success) {
+      throw new Error(`Decision Agent accuracy rate (${testReport.accuracyRate}%) fell below expected threshold (80%)`);
+    }
+
+    doc.status = 'SUCCESS';
+    doc.executionTimeMs = Date.now() - startTime;
+    doc.completedAt = new Date();
+    doc.logs = logs;
+    doc.payload = {
+      accuracyRate: testReport.accuracyRate,
+      passedCount: testReport.passedCount,
+      totalProfiles: testReport.totalProfiles,
+      createdDecisionRecordsCount: testReport.createdDecisionRecordsCount,
+      testResults: testReport.testResults,
+    };
+    await doc.save();
+
+    return doc;
+  } catch (err) {
+    addLog(logs, 'ERROR', `Decision Agent Testing scenario failed: ${err.message}`, { stack: err.stack });
+    doc.status = 'FAILED';
+    doc.executionTimeMs = Date.now() - startTime;
+    doc.completedAt = new Date();
+    doc.logs = logs;
+    doc.errorDetails = { message: err.message, stack: err.stack };
+    await doc.save();
+    return doc;
+  }
+};
+
+/**
  * Runner Map for Scenario IDs
  */
 const SCENARIO_RUNNERS = {
@@ -733,6 +790,7 @@ const SCENARIO_RUNNERS = {
   REVENUE_RECOVERY: scenarioSimulateRevenueRecovery,
   ALL_AGENT_WORKFLOWS: scenarioSimulateAllAgentWorkflows,
   RISK_DETECTION_TESTING: scenarioTestRiskDetectionAgent,
+  DECISION_AGENT_TESTING: scenarioTestDecisionAgent,
 };
 
 /**

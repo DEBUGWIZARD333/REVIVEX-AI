@@ -1,5 +1,6 @@
 import * as decisionService from '../services/decisionService.js';
 import { DECISION_TYPES } from '../models/DecisionEvent.js';
+import { globalDecisionAgentValidator } from '../services/decisionAgentValidator.js';
 import mongoose from 'mongoose';
 
 export const createDecision = async (req, res, next) => {
@@ -120,6 +121,19 @@ export const getDecisionStats = async (req, res, next) => {
     res.json({
       success: true,
       data: stats,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const validateAccuracy = async (req, res, next) => {
+  try {
+    const report = await globalDecisionAgentValidator.runDecisionTestSuite();
+    res.json({
+      success: true,
+      message: 'Ran Decision Agent testing & explainability validation suite',
+      data: report,
     });
   } catch (error) {
     next(error);

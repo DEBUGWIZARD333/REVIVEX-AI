@@ -57,6 +57,14 @@ const SCENARIO_CARDS = [
     buttonColor: 'bg-red-600 hover:bg-red-700 text-white',
   },
   {
+    id: 'DECISION_AGENT_TESTING',
+    title: 'Decision Agent Testing',
+    description: 'Evaluates risk score, customer history, cart value & strategy reasoning',
+    icon: Cpu,
+    color: 'border-purple-500 bg-purple-50 text-purple-700',
+    buttonColor: 'bg-purple-600 hover:bg-purple-700 text-white',
+  },
+  {
     id: 'COUPON_RECOVERY',
     title: 'Simulate Coupon Recovery',
     description: 'Evaluates high-risk event, issues coupon & discount workflow',
