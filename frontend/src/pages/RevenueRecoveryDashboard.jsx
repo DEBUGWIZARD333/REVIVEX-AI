@@ -69,6 +69,29 @@ const RevenueRecoveryDashboard = () => {
     return () => clearInterval(interval);
   }, [autoRefresh, loadDashboardData]);
 
+  const [testSuiteReport, setTestSuiteReport] = useState(null);
+  const [testingRunning, setTestingRunning] = useState(false);
+
+  const handleRunRecoveryTest = async () => {
+    try {
+      setTestingRunning(true);
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/recovery-agent/validate-accuracy', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTestSuiteReport(data.data);
+        loadDashboardData(true);
+      }
+    } catch (err) {
+      console.error('Recovery Agent test failed:', err);
+    } finally {
+      setTestingRunning(false);
+    }
+  };
+
   // Mock Decision Distribution Data for Pie Chart
   const decisionDistribution = [
     { name: 'Coupon Offer', count: 42, color: 'bg-emerald-500', barColor: '#10b981', percentage: 42 },
@@ -79,10 +102,10 @@ const RevenueRecoveryDashboard = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Top Header & Refresh Control */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
           <div>
             <div className="flex items-center space-x-3">
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center">
@@ -99,7 +122,16 @@ const RevenueRecoveryDashboard = () => {
           </div>
 
           <div className="flex items-center space-x-3">
-            <label className="flex items-center space-x-2 text-xs font-semibold text-slate-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50">
+            <button
+              onClick={handleRunRecoveryTest}
+              disabled={testingRunning}
+              className="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs shadow-sm transition disabled:opacity-50"
+            >
+              <Zap size={14} className={`mr-1.5 ${testingRunning ? 'animate-spin' : ''}`} />
+              {testingRunning ? 'Testing Channels...' : 'Run Recovery Agent Test'}
+            </button>
+
+            <label className="flex items-center space-x-2 text-xs font-semibold text-slate-600 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-100">
               <input
                 type="checkbox"
                 checked={autoRefresh}
@@ -112,13 +144,41 @@ const RevenueRecoveryDashboard = () => {
             <button
               onClick={() => loadDashboardData()}
               disabled={refreshing}
-              className="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs shadow-sm transition disabled:opacity-50"
+              className="inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-sm transition disabled:opacity-50"
             >
               <RefreshCw size={14} className={`mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh Now
+              Refresh
             </button>
           </div>
         </div>
+
+        {/* Test Report Banner */}
+        {testSuiteReport && (
+          <div className="bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 rounded-3xl p-6 text-white shadow-xl border border-emerald-900 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
+                <Zap size={16} />
+                <span>Recovery Agent Channel & Conversion Report</span>
+              </div>
+              <h3 className="text-xl font-bold">Tested {testSuiteReport.totalTests} Recovery Action Channels</h3>
+              <p className="text-xs text-emerald-200 mt-1">
+                Validated cart recovery links, discount coupons, 1-click retry payment links, email dispatch, and successful revenue conversion.
+              </p>
+            </div>
+
+            <div className="flex items-center space-x-4 bg-white/10 p-4 rounded-2xl border border-white/10 flex-shrink-0">
+              <div className="text-center">
+                <span className="text-[10px] text-slate-300 uppercase font-bold">Pass Rate</span>
+                <div className="text-3xl font-extrabold text-emerald-400">{testSuiteReport.accuracyRate}%</div>
+              </div>
+              <div className="h-8 w-px bg-white/20"></div>
+              <div className="text-center">
+                <span className="text-[10px] text-slate-300 uppercase font-bold">Passed / Total</span>
+                <div className="text-3xl font-extrabold text-white">{testSuiteReport.passedCount}/{testSuiteReport.totalTests}</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* SECTION 1: 6 Dashboard Cards Grid */}
         <div className="mb-8">

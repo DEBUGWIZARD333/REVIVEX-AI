@@ -65,6 +65,14 @@ const SCENARIO_CARDS = [
     buttonColor: 'bg-purple-600 hover:bg-purple-700 text-white',
   },
   {
+    id: 'RECOVERY_AGENT_TESTING',
+    title: 'Recovery Agent Testing',
+    description: 'Tests links, coupons, retry URLs, email dispatch & conversions',
+    icon: TrendingUp,
+    color: 'border-emerald-500 bg-emerald-50 text-emerald-700',
+    buttonColor: 'bg-emerald-600 hover:bg-emerald-700 text-white',
+  },
+  {
     id: 'COUPON_RECOVERY',
     title: 'Simulate Coupon Recovery',
     description: 'Evaluates high-risk event, issues coupon & discount workflow',

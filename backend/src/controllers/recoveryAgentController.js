@@ -1,4 +1,5 @@
 import * as recoveryAgentService from '../services/recoveryAgentService.js';
+import { globalRecoveryAgentValidator } from '../services/recoveryAgentValidator.js';
 
 export const processDecision = async (req, res, next) => {
   try {
@@ -39,6 +40,19 @@ export const stopWorker = async (req, res, next) => {
   try {
     const result = recoveryAgentService.stopRecoveryAgentWorker();
     res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const validateAccuracy = async (req, res, next) => {
+  try {
+    const report = await globalRecoveryAgentValidator.runRecoveryTestSuite();
+    res.json({
+      success: true,
+      message: 'Ran Recovery Agent actions & conversion validation suite',
+      data: report,
+    });
   } catch (error) {
     next(error);
   }
