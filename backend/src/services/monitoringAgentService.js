@@ -2,6 +2,7 @@ import Event from '../models/Event.js';
 import * as agentLogService from './agentLogService.js';
 import analysisEngine from './eventAnalysisEngine.js';
 import { handlePaymentFailureEvent } from './paymentFailureDetectorService.js';
+import { globalEventIntegrityValidator } from './eventIntegrityValidator.js';
 
 const AGENT_NAME = 'EventMonitoringAgent';
 let isRunning = false;
@@ -28,7 +29,7 @@ export const analyzeEvent = async (event) => {
 };
 
 /**
- * 3. Process a single event: Log execution -> Analyze Rules -> Trigger Payment Failure Detector -> Complete Log -> Mark Processed
+ * 3. Process a single event: Log execution -> Analyze Rules -> Validate Integrity -> Complete Log -> Mark Processed
  */
 export const processSingleEvent = async (event) => {
   // Step 3a: Write initial RECEIVED Log
@@ -48,25 +49,30 @@ export const processSingleEvent = async (event) => {
       eventId: event._id,
       eventType: event.eventType,
       status: 'PROCESSING',
-      message: `Running rule-based analysis engine`,
+      message: `Running rule-based analysis engine & event flow integrity check`,
       processedAt: new Date(),
     });
 
-    // Step 3c: Execute rule-based analysis engine
+    // Step 3c: Execute rule-based analysis engine & integrity validator
     const analysis = await analyzeEvent(event);
+    const integrityResult = await globalEventIntegrityValidator.validateEventIntegrity(event);
 
     // Step 3d: Trigger Payment Failure Detector if event is PAYMENT_FAILED
     if (event.eventType === 'PAYMENT_FAILED') {
       await handlePaymentFailureEvent(event);
     }
 
-    // Step 3e: Write COMPLETED Log with exact required rule logMessage
+    const integrityFlag = integrityResult.isValid
+      ? '[Integrity: VALID]'
+      : `[Integrity: ${integrityResult.status} (${integrityResult.anomalies.map((a) => a.type).join(', ')})]`;
+
+    // Step 3e: Write COMPLETED Log with required rule logMessage & integrity status
     await agentLogService.createAgentLog({
       agentName: AGENT_NAME,
       eventId: event._id,
       eventType: event.eventType,
       status: 'COMPLETED',
-      message: `${analysis.primaryLogMessage} | Intent: ${analysis.intent} | Rules Matched: [${analysis.matchedRules.join(', ') || 'NONE'}]`,
+      message: `${analysis.primaryLogMessage} | Intent: ${analysis.intent} | ${integrityFlag}`,
       processedAt: new Date(),
     });
 
@@ -75,7 +81,7 @@ export const processSingleEvent = async (event) => {
     await event.save();
 
     processedCountInSession++;
-    return { success: true, eventId: event._id, analysis };
+    return { success: true, eventId: event._id, analysis, integrityResult };
   } catch (error) {
     // Write FAILED Log if error occurs
     await agentLogService.createAgentLog({

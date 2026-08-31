@@ -50,6 +50,11 @@ export const fetchMonitoringStatus = async () => {
   return response.data;
 };
 
+export const fetchEventIntegrityReport = async () => {
+  const response = await axios.get(`${BASE_URL}/monitoring/integrity-report`, getAuthHeaders());
+  return response.data;
+};
+
 // Risk Dashboard APIs
 export const fetchRiskStats = async () => {
   const response = await axios.get(`${BASE_URL}/risk-events/stats`, getAuthHeaders());
