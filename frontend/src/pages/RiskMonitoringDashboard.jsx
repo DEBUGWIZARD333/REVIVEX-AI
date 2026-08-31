@@ -107,6 +107,29 @@ const RiskMonitoringDashboard = () => {
     }
   };
 
+  const [testSuiteReport, setTestSuiteReport] = useState(null);
+  const [testingRunning, setTestingRunning] = useState(false);
+
+  const handleRunAccuracyTest = async () => {
+    try {
+      setTestingRunning(true);
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/risk-events/validate-accuracy', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTestSuiteReport(data.data);
+        loadRiskData(true);
+      }
+    } catch (err) {
+      console.error('Accuracy test failed:', err);
+    } finally {
+      setTestingRunning(false);
+    }
+  };
+
   const leakage = stats?.revenueLeakageSummary || {
     abandonedCartValue: 0,
     failedPaymentValue: 0,
@@ -121,10 +144,10 @@ const RiskMonitoringDashboard = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Top Header & Action Controls */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
           <div>
             <div className="flex items-center space-x-3">
               <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center">
@@ -142,7 +165,16 @@ const RiskMonitoringDashboard = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-3">
-            <label className="flex items-center space-x-2 text-xs font-semibold text-slate-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50">
+            <button
+              onClick={handleRunAccuracyTest}
+              disabled={testingRunning}
+              className="inline-flex items-center px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl text-xs shadow-sm transition disabled:opacity-50"
+            >
+              <Zap size={14} className={`mr-1.5 ${testingRunning ? 'animate-spin' : ''}`} />
+              {testingRunning ? 'Testing Scorer...' : 'Run Risk Detection Test'}
+            </button>
+
+            <label className="flex items-center space-x-2 text-xs font-semibold text-slate-600 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-100">
               <input
                 type="checkbox"
                 checked={autoRefresh}
@@ -158,10 +190,38 @@ const RiskMonitoringDashboard = () => {
               className="inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-sm transition disabled:opacity-50"
             >
               <RefreshCw size={14} className={`mr-1.5 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh Now
+              Refresh
             </button>
           </div>
         </div>
+
+        {/* Test Suite Accuracy Feedback Banner if tested */}
+        {testSuiteReport && (
+          <div className="bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 rounded-3xl p-6 text-white shadow-xl border border-rose-900 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="flex items-center space-x-2 text-rose-400 text-xs font-bold uppercase tracking-wider mb-1">
+                <CheckCircle size={16} />
+                <span>Risk Detection Accuracy Validation Report</span>
+              </div>
+              <h3 className="text-xl font-bold">Tested {testSuiteReport.totalScenarios} Synthetic Risk Scenarios</h3>
+              <p className="text-xs text-rose-200 mt-1">
+                Validated abandoned carts, payment failures, dynamic scoring, risk reasons, and recovery opportunities.
+              </p>
+            </div>
+
+            <div className="flex items-center space-x-4 bg-white/10 p-4 rounded-2xl border border-white/10 flex-shrink-0">
+              <div className="text-center">
+                <span className="text-[10px] text-slate-300 uppercase font-bold">Accuracy Score</span>
+                <div className="text-3xl font-extrabold text-emerald-400">{testSuiteReport.accuracyRate}%</div>
+              </div>
+              <div className="h-8 w-px bg-white/20"></div>
+              <div className="text-center">
+                <span className="text-[10px] text-slate-300 uppercase font-bold">Passed / Total</span>
+                <div className="text-3xl font-extrabold text-white">{testSuiteReport.passedCount}/{testSuiteReport.totalScenarios}</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Section 1: Risk Summary Cards (4 Main Metric Cards) */}
         <div className="mb-10">

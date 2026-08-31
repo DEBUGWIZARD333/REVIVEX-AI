@@ -1,5 +1,6 @@
 import * as riskEventService from '../services/riskEventService.js';
 import { RISK_EVENT_TYPES, RISK_STATUSES } from '../models/RiskEvent.js';
+import { globalRiskDetectionValidator } from '../services/riskDetectionValidator.js';
 import mongoose from 'mongoose';
 
 export const createRiskEvent = async (req, res, next) => {
@@ -186,6 +187,19 @@ export const getRiskStats = async (req, res, next) => {
     res.json({
       success: true,
       data: stats,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const validateAccuracy = async (req, res, next) => {
+  try {
+    const report = await globalRiskDetectionValidator.runRiskDetectionTestSuite();
+    res.json({
+      success: true,
+      message: 'Ran risk detection accuracy testing suite',
+      data: report,
     });
   } catch (error) {
     next(error);

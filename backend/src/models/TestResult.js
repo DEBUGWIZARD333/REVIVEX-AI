@@ -37,6 +37,7 @@ const testResultSchema = new mongoose.Schema(
         'COUPON_RECOVERY',
         'REVENUE_RECOVERY',
         'ALL_AGENT_WORKFLOWS',
+        'RISK_DETECTION_TESTING',
       ],
     },
     scenarioName: {

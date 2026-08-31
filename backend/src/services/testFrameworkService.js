@@ -18,6 +18,7 @@ import * as recoveryAgentService from './recoveryAgentService.js';
 import { globalRecoveryWorkflowEngine } from './recoveryWorkflowEngine.js';
 import * as couponService from './couponService.js';
 import * as recoveryLinkService from './recoveryLinkService.js';
+import { globalRiskDetectionValidator } from './riskDetectionValidator.js';
 
 /**
  * Helper to log steps into both memory & TestResult Mongo document
@@ -666,6 +667,62 @@ export const scenarioSimulateAllAgentWorkflows = async (suiteRunId, testDoc = nu
 };
 
 /**
+ * SCENARIO 7: Risk Detection Agent Testing & Accuracy Validation
+ */
+export const scenarioTestRiskDetectionAgent = async (suiteRunId, testDoc = null) => {
+  const startTime = Date.now();
+  const logs = [];
+  addLog(logs, 'INFO', 'Starting scenario: Risk Detection Agent Testing & Accuracy Validation');
+
+  const doc = testDoc || new TestResult({
+    suiteRunId: suiteRunId || `SUITE-${Date.now()}`,
+    scenarioId: 'RISK_DETECTION_TESTING',
+    scenarioName: 'Risk Detection Agent Testing',
+    status: 'RUNNING',
+    startedAt: new Date(),
+    logs,
+  });
+
+  doc.status = 'RUNNING';
+  await doc.save();
+
+  try {
+    addLog(logs, 'INFO', 'Executing Risk Detection Test Suite across synthetic mock dataset...');
+    const testReport = await globalRiskDetectionValidator.runRiskDetectionTestSuite(logs);
+
+    addLog(logs, testReport.success ? 'SUCCESS' : 'WARN', `Risk Detection Test Suite completed. Accuracy: ${testReport.accuracyRate}% (${testReport.passedCount}/${testReport.totalScenarios} passed)`, testReport);
+
+    if (!testReport.success) {
+      throw new Error(`Risk Detection accuracy rate (${testReport.accuracyRate}%) fell below expected threshold (80%)`);
+    }
+
+    doc.status = 'SUCCESS';
+    doc.executionTimeMs = Date.now() - startTime;
+    doc.completedAt = new Date();
+    doc.logs = logs;
+    doc.payload = {
+      accuracyRate: testReport.accuracyRate,
+      passedCount: testReport.passedCount,
+      totalScenarios: testReport.totalScenarios,
+      createdRiskRecordsCount: testReport.createdRiskRecordsCount,
+      scenarioResults: testReport.scenarioResults,
+    };
+    await doc.save();
+
+    return doc;
+  } catch (err) {
+    addLog(logs, 'ERROR', `Risk Detection Testing scenario failed: ${err.message}`, { stack: err.stack });
+    doc.status = 'FAILED';
+    doc.executionTimeMs = Date.now() - startTime;
+    doc.completedAt = new Date();
+    doc.logs = logs;
+    doc.errorDetails = { message: err.message, stack: err.stack };
+    await doc.save();
+    return doc;
+  }
+};
+
+/**
  * Runner Map for Scenario IDs
  */
 const SCENARIO_RUNNERS = {
@@ -675,6 +732,7 @@ const SCENARIO_RUNNERS = {
   COUPON_RECOVERY: scenarioSimulateCouponRecovery,
   REVENUE_RECOVERY: scenarioSimulateRevenueRecovery,
   ALL_AGENT_WORKFLOWS: scenarioSimulateAllAgentWorkflows,
+  RISK_DETECTION_TESTING: scenarioTestRiskDetectionAgent,
 };
 
 /**

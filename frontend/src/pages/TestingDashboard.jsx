@@ -18,6 +18,7 @@ import {
   Layers,
   ChevronRight,
   X,
+  ShieldAlert,
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000/api/testing';
@@ -46,6 +47,14 @@ const SCENARIO_CARDS = [
     icon: CreditCard,
     color: 'border-rose-500 bg-rose-50 text-rose-700',
     buttonColor: 'bg-rose-600 hover:bg-rose-700 text-white',
+  },
+  {
+    id: 'RISK_DETECTION_TESTING',
+    title: 'Risk Detection Agent Testing',
+    description: 'Validates risk scores (0-100), reasons, and recovery opportunities',
+    icon: ShieldAlert,
+    color: 'border-red-500 bg-red-50 text-red-700',
+    buttonColor: 'bg-red-600 hover:bg-red-700 text-white',
   },
   {
     id: 'COUPON_RECOVERY',
