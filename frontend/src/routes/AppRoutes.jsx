@@ -15,6 +15,7 @@ import DecisionDashboard from '../pages/DecisionDashboard';
 import RevenueRecoveryDashboard from '../pages/RevenueRecoveryDashboard';
 import RecoveryLinkHandler from '../pages/RecoveryLinkHandler';
 import TestingDashboard from '../pages/TestingDashboard';
+import ReviveXAnalyticsDashboard from '../pages/ReviveXAnalyticsDashboard';
 
 const AppRoutes = () => {
   return (
@@ -26,6 +27,10 @@ const AppRoutes = () => {
       <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/recover/cart/:token" element={<RecoveryLinkHandler />} />
+      <Route path="/analytics" element={<ReviveXAnalyticsDashboard />} />
+      <Route path="/analytics-dashboard" element={<ReviveXAnalyticsDashboard />} />
+      <Route path="/hackathon-dashboard" element={<ReviveXAnalyticsDashboard />} />
+      <Route path="/revivex-analytics" element={<ReviveXAnalyticsDashboard />} />
       <Route path="/testing-dashboard" element={<TestingDashboard />} />
       <Route path="/testing" element={<TestingDashboard />} />
       <Route path="/login" element={<Login />} />
@@ -48,6 +53,7 @@ const AppRoutes = () => {
         <Route path="/admin/decision-dashboard" element={<DecisionDashboard />} />
         <Route path="/admin/revenue-recovery" element={<RevenueRecoveryDashboard />} />
         <Route path="/admin/testing" element={<TestingDashboard />} />
+        <Route path="/admin/analytics" element={<ReviveXAnalyticsDashboard />} />
       </Route>
       
       {/* 404 Route */}

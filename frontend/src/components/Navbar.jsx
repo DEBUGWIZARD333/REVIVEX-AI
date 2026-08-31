@@ -110,10 +110,16 @@ const Navbar = () => {
                   Decision AI
                 </Link>
                 <Link
+                  to="/analytics"
+                  className="hidden sm:block text-brand-600 hover:text-brand-700 font-extrabold text-sm transition bg-brand-50 px-3 py-1 rounded-full border border-brand-300 shadow-sm"
+                >
+                  ReviveX Analytics
+                </Link>
+                <Link
                   to="/revenue-recovery"
                   className="hidden sm:block text-emerald-600 hover:text-emerald-700 font-bold text-sm transition bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200"
                 >
-                  Revenue Analytics
+                  Revenue
                 </Link>
                 <Link
                   to="/testing-dashboard"

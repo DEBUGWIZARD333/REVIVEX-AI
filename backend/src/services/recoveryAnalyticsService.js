@@ -74,18 +74,34 @@ export const getRecoveryMetrics = async (dateFilter = {}) => {
   const recoveredRevenue = recoveredRevenueAgg[0]?.total || 0;
 
   // 3. Failed Payments Count
-  const failedPayments = await Event.countDocuments({
+  const failedPaymentsEvents = await Event.countDocuments({
     ...matchCriteria,
     eventType: 'PAYMENT_FAILED',
   });
+  const failedPaymentsRisk = await RiskEvent.countDocuments({
+    ...matchCriteria,
+    eventType: 'PAYMENT_FAILED',
+  });
+  const failedPayments = Math.max(failedPaymentsEvents, failedPaymentsRisk);
 
   // 4. Abandoned Carts Count
-  const abandonedCarts = await Event.countDocuments({
+  const abandonedCartsEvents = await Event.countDocuments({
     ...matchCriteria,
     eventType: 'CART_ABANDONED',
   });
+  const abandonedCartsRisk = await RiskEvent.countDocuments({
+    ...matchCriteria,
+    eventType: 'CART_ABANDONED',
+  });
+  const abandonedCarts = Math.max(abandonedCartsEvents, abandonedCartsRisk);
 
-  // 5. Agent Decisions Count
+  // 5. Active Recoveries Count (Pending or Sent)
+  const activeRecoveries = await RecoveryEvent.countDocuments({
+    ...matchCriteria,
+    status: { $in: ['PENDING', 'SENT'] },
+  });
+
+  // 6. Agent Decisions Count
   const agentDecisions = await DecisionEvent.countDocuments(matchCriteria);
 
   // Recovery Rate calculation
@@ -97,6 +113,7 @@ export const getRecoveryMetrics = async (dateFilter = {}) => {
     revenueAtRisk: parseFloat(revenueAtRisk.toFixed(2)),
     recoveredRevenue: parseFloat(recoveredRevenue.toFixed(2)),
     recoveryRate,
+    activeRecoveries,
     failedPayments,
     abandonedCarts,
     agentDecisions,
