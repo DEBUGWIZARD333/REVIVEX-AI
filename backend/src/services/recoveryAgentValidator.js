@@ -55,7 +55,7 @@ export class RecoveryAgentValidator {
         { recoveryAmount: 299.99, expiresInHours: 24 }
       );
 
-      const isValidLink = !!(linkResult.recoveryLink && linkResult.recoveryToken);
+      const isValidLink = !!(linkResult.recoveryLink && linkResult.token);
       if (isValidLink) passedCount++;
 
       const recDoc = await RecoveryEvent.create({
@@ -157,7 +157,7 @@ export class RecoveryAgentValidator {
         { recoveryAmount: 299.99, expiresInHours: 1 }
       );
 
-      const isValidRetry = !!(retryResult.recoveryLink && retryResult.recoveryToken);
+      const isValidRetry = !!(retryResult.recoveryLink && retryResult.token);
       if (isValidRetry) passedCount++;
 
       const recDoc = await RecoveryEvent.create({

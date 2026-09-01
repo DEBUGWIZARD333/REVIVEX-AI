@@ -36,7 +36,7 @@ export class RiskConfigService {
    */
   loadEnvironmentConfig() {
     this.config = {
-      cartAbandonmentMinutes: parseInt(process.env.CART_ABANDONMENT_MINUTES, 10) || 30,
+      cartAbandonmentMinutes: parseFloat(process.env.CART_ABANDONMENT_MINUTES) || 0.25,
       riskWeights: {
         CART_ABANDONED: parseInt(process.env.RISK_WEIGHT_CART_ABANDONED, 10) || 45,
         PAYMENT_FAILED: parseInt(process.env.RISK_WEIGHT_PAYMENT_FAILED, 10) || 85,
@@ -62,8 +62,8 @@ export class RiskConfigService {
       baseWeight: this.config.riskWeights.CART_ABANDONED,
       match: (eventData) => {
         if (eventData.eventType !== 'CART_ABANDONED') return false;
-        const idleMinutes = eventData.idleMinutes || 35;
-        return idleMinutes >= this.config.cartAbandonmentMinutes;
+        const idleMinutes = eventData.idleMinutes !== undefined ? eventData.idleMinutes : 0.25;
+        return idleMinutes >= (this.config.cartAbandonmentMinutes || 0.25);
       },
       calculateScore: (eventData) => {
         const base = this.config.riskWeights.CART_ABANDONED;

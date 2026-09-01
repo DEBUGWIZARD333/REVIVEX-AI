@@ -78,8 +78,8 @@ app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   // Start Event Monitoring Agent background polling loop (every 5 seconds)
   startMonitoringAgent(5000);
-  // Start Cart Abandonment Detector scheduled job (every 10 minutes)
-  startAbandonmentDetectorJob(10);
+  // Start Cart Abandonment Detector scheduled job (every 0.25 minutes / 15 seconds)
+  startAbandonmentDetectorJob(0.25);
   // Start Recovery Agent Core worker loop (every 10 seconds)
   startRecoveryAgentWorker(10000);
 });

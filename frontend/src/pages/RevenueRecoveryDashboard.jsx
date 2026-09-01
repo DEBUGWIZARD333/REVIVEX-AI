@@ -14,10 +14,13 @@ import {
   PieChart as PieIcon,
   BarChart3,
   Percent,
+  MessageSquare,
 } from 'lucide-react';
 import * as dashboardService from '../services/dashboardService';
+import { useAuth } from '../hooks/useAuth';
 
 const RevenueRecoveryDashboard = () => {
+  const { user } = useAuth();
   const [metrics, setMetrics] = useState(null);
   const [recoveryActions, setRecoveryActions] = useState([]);
   const [riskEvents, setRiskEvents] = useState([]);
@@ -72,6 +75,46 @@ const RevenueRecoveryDashboard = () => {
   const [testSuiteReport, setTestSuiteReport] = useState(null);
   const [testingRunning, setTestingRunning] = useState(false);
 
+  const [whatsappSending, setWhatsappSending] = useState(false);
+  const [whatsappSuccessAlert, setWhatsappSuccessAlert] = useState(null);
+
+  const handleSimulateWhatsApp = async () => {
+    try {
+      setWhatsappSending(true);
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/recovery-agent/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          actionType: 'WHATSAPP',
+          userId: user?._id,
+          cartValue: 249.99,
+          details: {
+            eventType: 'CART_ABANDONED',
+            phone: user?.phone || '+918825553110',
+            customerName: user?.name || 'Demo Customer',
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setWhatsappSuccessAlert({
+          phone: data.data?.details?.phone || user?.phone || '+918825553110',
+          text: data.data?.details?.text,
+          url: data.data?.details?.whatsappWebUrl,
+        });
+        loadDashboardData(true);
+      }
+    } catch (err) {
+      console.error('WhatsApp simulation failed:', err);
+    } finally {
+      setWhatsappSending(false);
+    }
+  };
+
   const handleRunRecoveryTest = async () => {
     try {
       setTestingRunning(true);
@@ -94,10 +137,10 @@ const RevenueRecoveryDashboard = () => {
 
   // Mock Decision Distribution Data for Pie Chart
   const decisionDistribution = [
-    { name: 'Coupon Offer', count: 42, color: 'bg-emerald-500', barColor: '#10b981', percentage: 42 },
-    { name: '1-Click Retry Link', count: 28, color: 'bg-indigo-500', barColor: '#6366f1', percentage: 28 },
-    { name: 'VIP Alert Escalation', count: 18, color: 'bg-amber-500', barColor: '#f59e0b', percentage: 18 },
-    { name: 'Email Reminder', count: 12, color: 'bg-purple-500', barColor: '#a855f7', percentage: 12 },
+    { name: 'WhatsApp Text Recovery', count: 54, color: 'bg-green-500', barColor: '#22c55e', percentage: 45 },
+    { name: 'Coupon Offer', count: 32, color: 'bg-emerald-500', barColor: '#10b981', percentage: 27 },
+    { name: '1-Click Retry Link', count: 22, color: 'bg-indigo-500', barColor: '#6366f1', percentage: 18 },
+    { name: 'Email Reminder', count: 12, color: 'bg-purple-500', barColor: '#a855f7', percentage: 10 },
   ];
 
   return (
@@ -117,11 +160,20 @@ const RevenueRecoveryDashboard = () => {
               </span>
             </div>
             <p className="mt-1 text-sm text-slate-500">
-              Autonomous AI recovery metrics, real-time risk telemetry, and agent decision analytics.
+              Autonomous AI recovery metrics, WhatsApp text messaging recovery, and agent decision analytics.
             </p>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={handleSimulateWhatsApp}
+              disabled={whatsappSending}
+              className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl text-xs shadow-sm transition disabled:opacity-50"
+            >
+              <MessageSquare size={14} className={`mr-1.5 ${whatsappSending ? 'animate-bounce' : ''}`} />
+              {whatsappSending ? 'Sending WhatsApp...' : 'Simulate WhatsApp Text Recovery'}
+            </button>
+
             <button
               onClick={handleRunRecoveryTest}
               disabled={testingRunning}
@@ -151,6 +203,34 @@ const RevenueRecoveryDashboard = () => {
             </button>
           </div>
         </div>
+
+        {/* WhatsApp Success Dispatch Banner */}
+        {whatsappSuccessAlert && (
+          <div className="bg-gradient-to-r from-emerald-900 via-green-800 to-emerald-950 rounded-3xl p-6 text-white shadow-xl border border-green-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2 text-green-300 text-xs font-bold uppercase tracking-wider">
+                <MessageSquare size={16} />
+                <span>WhatsApp Text Recovery Message Dispatched</span>
+              </div>
+              <p className="text-sm font-semibold">
+                Recipient: <strong className="text-green-200">{whatsappSuccessAlert.phone}</strong>
+              </p>
+              <p className="text-xs text-green-100 bg-white/10 p-3 rounded-xl font-mono max-w-2xl">
+                "{whatsappSuccessAlert.text}"
+              </p>
+            </div>
+            {whatsappSuccessAlert.url && (
+              <a
+                href={whatsappSuccessAlert.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center px-5 py-3 bg-green-500 hover:bg-green-400 text-slate-950 font-extrabold rounded-2xl text-xs shadow-lg transition flex-shrink-0"
+              >
+                <MessageSquare size={16} className="mr-2" /> Open Web WhatsApp Chat &rarr;
+              </a>
+            )}
+          </div>
+        )}
 
         {/* Test Report Banner */}
         {testSuiteReport && (
@@ -468,20 +548,42 @@ const RevenueRecoveryDashboard = () => {
                       {recoveryActions.map((item) => (
                         <tr key={item._id} className="hover:bg-slate-50 transition">
                           <td className="py-3.5 px-3">
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
-                              {item.actionType}
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border ${
+                                item.actionType === 'WHATSAPP'
+                                  ? 'bg-green-100 text-green-900 border-green-300'
+                                  : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                              }`}
+                            >
+                              {item.actionType === 'WHATSAPP' ? '💬 WHATSAPP TEXT' : item.actionType}
                             </span>
                           </td>
-                          <td className="py-3.5 px-3 font-semibold text-slate-900">
-                            {item.userId?.name || item.userId?.email || 'Guest Customer'}
+                          <td className="py-3.5 px-3">
+                            <div className="font-semibold text-slate-900">
+                              {item.userId?.name || item.userId?.email || 'Guest Customer'}
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-mono">
+                              📱 {item.details?.phone || item.userId?.phone || '+1 (555) 234-5678'}
+                            </div>
                           </td>
                           <td className="py-3.5 px-3 text-right font-extrabold text-emerald-600">
                             ${(item.recoveryAmount || 0).toFixed(2)}
                           </td>
                           <td className="py-3.5 px-3 text-center">
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
-                              {item.status}
-                            </span>
+                            {item.details?.whatsappWebUrl ? (
+                              <a
+                                href={item.details.whatsappWebUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-green-500 text-slate-950 hover:bg-green-400 transition shadow-sm"
+                              >
+                                Send WhatsApp &rarr;
+                              </a>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
+                                {item.status}
+                              </span>
+                            )}
                           </td>
                           <td className="py-3.5 px-3 text-right text-slate-400 font-mono">
                             {new Date(item.executedAt || item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

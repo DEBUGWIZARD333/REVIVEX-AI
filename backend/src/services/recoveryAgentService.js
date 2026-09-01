@@ -1,6 +1,9 @@
 import RecoveryEvent from '../models/RecoveryEvent.js';
 import DecisionEvent from '../models/DecisionEvent.js';
 import * as agentLogService from './agentLogService.js';
+import { sendWhatsAppRecoveryNotification } from './whatsappService.js';
+import { sendDirectCellularSMS } from './smsService.js';
+import { sendNotification } from './notificationService.js';
 
 const AGENT_NAME = 'RecoveryAgentCore';
 let isWorkerRunning = false;
@@ -13,14 +16,15 @@ let processedRecoveryCount = 0;
 export const mapDecisionToActionType = (decisionType) => {
   switch (decisionType) {
     case 'COUPON':
-      return 'COUPON';
+    case 'REMINDER':
+    case 'SMS':
+      return 'SMS';
+    case 'WHATSAPP':
+      return 'WHATSAPP';
     case 'RETRY_PAYMENT':
       return 'RECOVERY_LINK';
-    case 'ESCALATION':
-      return 'NOTIFICATION';
-    case 'REMINDER':
     default:
-      return 'EMAIL';
+      return 'SMS';
   }
 };
 
@@ -29,9 +33,86 @@ export const mapDecisionToActionType = (decisionType) => {
  */
 export const executeRecoveryAction = async (actionType, decisionData) => {
   const cartValue = decisionData.cartValue || decisionData.riskAmount || 0;
-  const userEmail = decisionData.userId?.email || 'customer@example.com';
+  
+  let targetUser = decisionData.userId;
+  if (targetUser && typeof targetUser === 'string') {
+    targetUser = await User.findById(targetUser);
+  } else if (targetUser && targetUser._id && !targetUser.phone) {
+    targetUser = await User.findById(targetUser._id);
+  }
+
+  const userEmail = targetUser?.email || decisionData.userEmail || 'customer@example.com';
+  const userPhone = targetUser?.phone || decisionData.phone || '+918825553110';
+  const customerName = targetUser?.name || decisionData.customerName || 'Valued Customer';
 
   switch (actionType) {
+    case 'SMS': {
+      const smsMsg = `ReviveX Recovery: Hi ${customerName}, you left items ($${cartValue.toFixed(2)}) in your cart. Checkout now: http://localhost:5173/checkout?recovery=true`;
+      const smsResult = await sendDirectCellularSMS({
+        userId: decisionData.userId?._id || decisionData.userId,
+        phone: userPhone,
+        message: smsMsg,
+      });
+
+      return {
+        actionType: 'SMS',
+        recoveryAmount: cartValue,
+        details: {
+          phone: smsResult.phone,
+          message: smsMsg,
+          smsDispatched: smsResult.smsDispatched,
+          gatewayUsed: smsResult.gatewayUsed,
+        },
+      };
+    }
+
+    case 'WHATSAPP': {
+      const waResult = await sendWhatsAppRecoveryNotification({
+        userId: decisionData.userId?._id || decisionData.userId,
+        phone: userPhone,
+        customerName,
+        eventType: decisionData.riskEventId?.eventType || 'CART_ABANDONED',
+        amount: cartValue,
+        recoveryLink: `http://localhost:5173/checkout?recovery=true`,
+      });
+
+      // Also trigger direct SMS
+      await sendDirectCellularSMS({
+        userId: decisionData.userId?._id || decisionData.userId,
+        phone: userPhone,
+        message: `ReviveX Cart Recovery: Hi ${customerName}, you left items ($${cartValue.toFixed(2)}) in your cart. Checkout: http://localhost:5173/checkout?recovery=true`,
+      });
+
+      // Dispatch in-app notification for customer UI
+      if (decisionData.userId?._id || decisionData.userId) {
+        try {
+          await sendNotification({
+            userId: decisionData.userId?._id || decisionData.userId,
+            category: 'CART_ABANDONED',
+            type: 'IN_APP',
+            variables: {
+              customerName,
+              cartTotal: cartValue,
+              recoveryLink: `http://localhost:5173/checkout?recovery=true`,
+            },
+          });
+        } catch (e) {
+          console.warn('[RecoveryAgentCore] Notification dispatch fallback:', e.message);
+        }
+      }
+
+      return {
+        actionType: 'WHATSAPP',
+        recoveryAmount: cartValue,
+        details: {
+          phone: waResult.phone,
+          whatsappWebUrl: waResult.whatsappWebUrl,
+          text: waResult.text,
+          message: `Dispatched WhatsApp text recovery to ${waResult.phone}`,
+        },
+      };
+    }
+
     case 'COUPON': {
       const couponCode = `SAVE20-${Math.floor(1000 + Math.random() * 9000)}`;
       return {

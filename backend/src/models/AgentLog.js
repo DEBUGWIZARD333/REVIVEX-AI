@@ -12,7 +12,7 @@ const agentLogSchema = new mongoose.Schema(
     eventId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Event',
-      required: [true, 'eventId is required'],
+      default: null,
     },
     eventType: {
       type: String,

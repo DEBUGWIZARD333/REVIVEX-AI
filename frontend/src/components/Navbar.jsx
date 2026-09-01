@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../context/CartContext';
 import { LogOut, User as UserIcon, ShoppingCart, Search, X } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -88,49 +89,68 @@ const Navbar = () => {
               )}
             </Link>
 
+            {/* In-App Customer Notification Bell & Toast Popup */}
+            <NotificationBell />
+
             {/* Auth Actions */}
             {user ? (
               <div className="flex items-center space-x-4">
+                {user.role === 'admin' && (
+                  <>
+                    <Link
+                      to="/analytics"
+                      className="hidden sm:block text-brand-600 hover:text-brand-700 font-extrabold text-sm transition bg-brand-50 px-3 py-1 rounded-full border border-brand-300 shadow-sm"
+                    >
+                      ReviveX Analytics
+                    </Link>
+                    <Link
+                      to="/revenue-recovery"
+                      className="hidden sm:block text-emerald-600 hover:text-emerald-700 font-bold text-sm transition bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200"
+                    >
+                      Revenue
+                    </Link>
+                    <Link
+                      to="/decision-dashboard"
+                      className="hidden sm:block text-purple-600 hover:text-purple-700 font-bold text-sm transition bg-purple-50 px-2.5 py-1 rounded-full border border-purple-200"
+                    >
+                      Decision AI
+                    </Link>
+                    <Link
+                      to="/risk-dashboard"
+                      className="hidden sm:block text-rose-600 hover:text-rose-700 font-bold text-sm transition bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200"
+                    >
+                      Risk
+                    </Link>
+                    <Link
+                      to="/testing-dashboard"
+                      className="hidden sm:block text-blue-600 hover:text-blue-700 font-bold text-sm transition bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200"
+                    >
+                      Testing Hub
+                    </Link>
+                  </>
+                )}
+
+                {/* Customer Profile Link */}
                 <Link
-                  to="/dashboard"
-                  className="hidden sm:block text-slate-600 hover:text-brand-600 font-medium text-sm transition"
+                  to="/profile"
+                  className="text-slate-600 hover:text-brand-600 font-semibold text-sm transition bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-200 flex items-center space-x-1.5"
                 >
-                  Events
+                  <UserIcon size={14} />
+                  <span>My Profile</span>
                 </Link>
                 <Link
-                  to="/risk-dashboard"
-                  className="hidden sm:block text-rose-600 hover:text-rose-700 font-bold text-sm transition bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200"
+                  to="/profile"
+                  className="flex items-center space-x-2 text-slate-700 bg-slate-100 hover:bg-slate-200 transition px-3 py-1 rounded-full text-xs font-semibold"
+                  title="View & Edit Mobile Phone Number Profile"
                 >
-                  Risk Dashboard
+                  <UserIcon size={14} />
+                  <span>{user.name}</span>
+                  {user.phone && (
+                    <span className="text-[11px] font-mono text-green-700 bg-green-100 px-2 py-0.5 rounded-full border border-green-300 ml-1">
+                      📱 {user.phone}
+                    </span>
+                  )}
                 </Link>
-                <Link
-                  to="/decision-dashboard"
-                  className="hidden sm:block text-purple-600 hover:text-purple-700 font-bold text-sm transition bg-purple-50 px-2.5 py-1 rounded-full border border-purple-200"
-                >
-                  Decision AI
-                </Link>
-                <Link
-                  to="/analytics"
-                  className="hidden sm:block text-brand-600 hover:text-brand-700 font-extrabold text-sm transition bg-brand-50 px-3 py-1 rounded-full border border-brand-300 shadow-sm"
-                >
-                  ReviveX Analytics
-                </Link>
-                <Link
-                  to="/revenue-recovery"
-                  className="hidden sm:block text-emerald-600 hover:text-emerald-700 font-bold text-sm transition bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200"
-                >
-                  Revenue
-                </Link>
-                <Link
-                  to="/testing-dashboard"
-                  className="hidden sm:block text-blue-600 hover:text-blue-700 font-bold text-sm transition bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200"
-                >
-                  Testing Hub
-                </Link>
-                <div className="flex items-center space-x-2 text-slate-700 bg-slate-100 px-3 py-1 rounded-full text-sm">
-                  <UserIcon size={16} />
-                  <span className="font-semibold">{user.name}</span>
-                </div>
                 <button
                   onClick={handleLogout}
                   className="flex items-center text-slate-500 hover:text-red-600 transition text-sm"

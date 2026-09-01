@@ -27,7 +27,6 @@ const recoveryTokenSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: [true, 'Expiration date is required'],
-      index: true,
     },
     isRedeemed: {
       type: Boolean,

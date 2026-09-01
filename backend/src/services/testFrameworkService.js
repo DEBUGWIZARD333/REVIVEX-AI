@@ -587,6 +587,7 @@ export const scenarioSimulateAllAgentWorkflows = async (suiteRunId, testDoc = nu
 
     // Agent 2: Risk Scoring Engine & Cart Abandonment Detector
     addLog(logs, 'INFO', 'Step 2/5: Testing Cart Abandonment & Risk Scoring Engine...');
+    await Cart.deleteMany({ userId: user._id });
     const cart = await Cart.create({
       userId: user._id,
       productId: product._id,

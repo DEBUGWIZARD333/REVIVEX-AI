@@ -146,8 +146,24 @@ const ReviveXAnalyticsDashboard = () => {
               </div>
             </div>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Real-time telemetry streams, AI Agent decision engines, risk scoring telemetry, and autonomous revenue recovery analytics.
+              Autonomous AI Revenue Recovery Engine — Detects revenue at risk, evaluates decision workflows, executes bounded recovery, and presents measured money recovered with an explainable audit trail.
             </p>
+            
+            {/* Track 03 Hackathon Badges */}
+            <div className="flex flex-wrap gap-2 pt-1">
+              <span className="text-[10px] font-extrabold text-amber-300 bg-amber-950/80 border border-amber-800/80 px-2.5 py-1 rounded-lg">
+                🎯 Detects Revenue at Risk
+              </span>
+              <span className="text-[10px] font-extrabold text-purple-300 bg-purple-950/80 border border-purple-800/80 px-2.5 py-1 rounded-lg">
+                ⚡ LangGraph Decision Engine
+              </span>
+              <span className="text-[10px] font-extrabold text-emerald-300 bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-1 rounded-lg">
+                🔄 Bounded Recovery Workflow
+              </span>
+              <span className="text-[10px] font-extrabold text-blue-300 bg-blue-950/80 border border-blue-800/80 px-2.5 py-1 rounded-lg">
+                📊 Measured Batch Money Recovered & Audit Trail
+              </span>
+            </div>
           </div>
 
           {/* Real-time Controls */}

@@ -13,7 +13,7 @@ let totalAbandonedCartsDetected = 0;
  */
 export const detectAbandonedCarts = async (abandonmentMinutesOverride = null) => {
   const config = riskConfigService.getConfig();
-  const minutes = abandonmentMinutesOverride || config.cartAbandonmentMinutes || 30;
+  const minutes = abandonmentMinutesOverride !== null ? abandonmentMinutesOverride : (config.cartAbandonmentMinutes || 0.25);
   
   const now = new Date();
   const cutoffDate = new Date(now.getTime() - minutes * 60 * 1000);
@@ -72,15 +72,15 @@ export const detectAbandonedCarts = async (abandonmentMinutesOverride = null) =>
     const cartTotalAmount = parseFloat(group.cartTotalAmount.toFixed(2));
     const totalQuantity = group.totalQuantity;
 
-    // 2. Check if a checkout or payment success occurred after the cart's last activity
-    const recentCheckoutOrPayment = await Event.findOne({
+    // 2. Check if a payment success occurred after the cart's last activity
+    const recentPaymentSuccess = await Event.findOne({
       userId,
-      eventType: { $in: ['CHECKOUT_STARTED', 'PAYMENT_SUCCESS'] },
+      eventType: 'PAYMENT_SUCCESS',
       timestamp: { $gte: group.lastActivityDate },
     });
 
-    if (recentCheckoutOrPayment) {
-      // User proceeded to checkout/payment; skip marking as abandoned
+    if (recentPaymentSuccess) {
+      // User successfully completed payment; skip marking as abandoned
       continue;
     }
 
@@ -139,13 +139,13 @@ export const detectAbandonedCarts = async (abandonmentMinutesOverride = null) =>
 /**
  * Scheduled Job Runner Support
  */
-export const startAbandonmentDetectorJob = (intervalMinutes = 10) => {
+export const startAbandonmentDetectorJob = (intervalMinutes = 0.083) => {
   if (isJobRunning) {
     return { success: false, message: 'Cart Abandonment Detector Job is already running' };
   }
 
   isJobRunning = true;
-  const intervalMs = intervalMinutes * 60 * 1000;
+  const intervalMs = Math.max(5000, intervalMinutes * 60 * 1000);
 
   jobIntervalId = setInterval(async () => {
     try {

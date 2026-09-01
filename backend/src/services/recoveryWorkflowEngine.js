@@ -2,6 +2,7 @@ import * as recoveryLinkService from './recoveryLinkService.js';
 import * as emailService from './emailService.js';
 import * as notificationService from './notificationService.js';
 import * as couponService from './couponService.js';
+import { sendDirectCellularSMS } from './smsService.js';
 import RecoveryEvent from '../models/RecoveryEvent.js';
 import * as agentLogService from './agentLogService.js';
 import mongoose from 'mongoose';
@@ -54,27 +55,21 @@ export class RecoveryWorkflowEngine {
         );
         stepsExecuted.push(`Generated Recovery Link: ${linkResult.recoveryLink}`);
 
-        // Step B: Send Email
-        const recipientEmail = evt.userEmail || evt.email || 'customer@example.com';
+        // Step B: Send Cellular SMS directly to registered phone number
         const customerName = evt.userName || evt.name || 'Valued Customer';
-        
-        await emailService.sendEmailWithRetry({
-          to: recipientEmail,
-          templateName: 'CART_REMINDER',
-          variables: {
-            customerName,
-            recoveryLink: linkResult.recoveryLink,
-            cartTotal: evt.riskAmount || 0,
-          },
+        const smsResult = await sendDirectCellularSMS({
+          userId: evt.userId,
+          message: `ReviveX Recovery: Hi ${customerName}, items ($${(evt.riskAmount || 0).toFixed(2)}) are waiting in your cart. Complete checkout: ${linkResult.recoveryLink}`,
         });
-        stepsExecuted.push(`Sent CART_REMINDER email to ${recipientEmail}`);
+        stepsExecuted.push(`Dispatched Cellular SMS to customer phone: ${smsResult.phone}`);
 
         return {
-          actionType: 'EMAIL',
+          actionType: 'SMS',
           details: {
             recoveryLink: linkResult.recoveryLink,
-            emailSentTo: recipientEmail,
-            templateUsed: 'CART_REMINDER',
+            phone: smsResult.phone,
+            smsDispatched: smsResult.smsDispatched,
+            gatewayUsed: smsResult.gatewayUsed,
             stepsExecuted,
           },
         };

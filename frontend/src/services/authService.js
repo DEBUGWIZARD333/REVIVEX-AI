@@ -25,3 +25,8 @@ export const getCurrentUser = async () => {
   const response = await axios.get(`${API_URL}/me`);
   return response.data;
 };
+
+export const updateProfile = async (profileData) => {
+  const response = await axios.put(`${API_URL}/profile`, profileData);
+  return response.data;
+};

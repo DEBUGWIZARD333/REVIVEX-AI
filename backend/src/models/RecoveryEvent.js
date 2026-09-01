@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export const RECOVERY_ACTION_TYPES = ['RECOVERY_LINK', 'COUPON', 'EMAIL', 'NOTIFICATION'];
+export const RECOVERY_ACTION_TYPES = ['RECOVERY_LINK', 'COUPON', 'EMAIL', 'NOTIFICATION', 'WHATSAPP', 'SMS'];
 export const RECOVERY_STATUSES = ['PENDING', 'SENT', 'COMPLETED', 'FAILED'];
 
 const recoveryEventSchema = new mongoose.Schema(
@@ -25,7 +25,7 @@ const recoveryEventSchema = new mongoose.Schema(
       required: [true, 'actionType is required for RecoveryEvent'],
       enum: {
         values: RECOVERY_ACTION_TYPES,
-        message: '{VALUE} is not a valid actionType. Allowed: RECOVERY_LINK, COUPON, EMAIL, NOTIFICATION',
+        message: '{VALUE} is not a valid actionType. Allowed: RECOVERY_LINK, COUPON, EMAIL, NOTIFICATION, WHATSAPP, SMS',
       },
       trim: true,
     },

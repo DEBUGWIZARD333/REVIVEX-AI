@@ -16,6 +16,7 @@ import RevenueRecoveryDashboard from '../pages/RevenueRecoveryDashboard';
 import RecoveryLinkHandler from '../pages/RecoveryLinkHandler';
 import TestingDashboard from '../pages/TestingDashboard';
 import ReviveXAnalyticsDashboard from '../pages/ReviveXAnalyticsDashboard';
+import UserProfile from '../pages/UserProfile';
 
 const AppRoutes = () => {
   return (
@@ -44,6 +45,7 @@ const AppRoutes = () => {
         <Route path="/decision-dashboard" element={<DecisionDashboard />} />
         <Route path="/revenue-recovery" element={<RevenueRecoveryDashboard />} />
         <Route path="/user-dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<UserProfile />} />
       </Route>
 
       {/* Admin Protected Routes */}

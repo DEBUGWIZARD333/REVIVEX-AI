@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export const DECISION_TYPES = ['REMINDER', 'COUPON', 'RETRY_PAYMENT', 'ESCALATION'];
+export const DECISION_TYPES = ['REMINDER', 'COUPON', 'RETRY_PAYMENT', 'ESCALATION', 'NO_ACTION'];
 
 const decisionEventSchema = new mongoose.Schema(
   {
