@@ -8,6 +8,7 @@ import {
   trackPaymentSuccess,
   trackPaymentFailed,
 } from '../services/eventTracker';
+import { createRazorpayOrder, verifyRazorpayPayment } from '../services/paymentService';
 import {
   ShieldCheck,
   ArrowLeft,
@@ -43,6 +44,18 @@ const Checkout = () => {
     if (cartItems.length > 0) {
       trackCheckoutStarted({ itemCount: cartItems.length, subtotal, grandTotal });
     }
+
+    // Load Razorpay script
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
   }, []);
 
   const {
@@ -71,24 +84,27 @@ const Checkout = () => {
     },
   });
 
-  const onSubmit = (data) => {
-    setIsSubmitting(true);
-    
-    // Track PAYMENT_INITIATED event with deduplication
-    trackPaymentInitiated({ paymentMethod, amount: grandTotal });
-
-    // Simulate payment processing & order creation
-    setTimeout(() => {
-      try {
-        const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
-        const orderData = {
-          orderId,
-          date: new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
-          shipping: {
+  const handleOrderSuccess = (data) => {
+    const orderId = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+    const orderData = {
+      orderId,
+      date: new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+      shipping: {
+        fullName: data.shipping_fullName,
+        mobile: data.shipping_mobile,
+        email: data.shipping_email,
+        address1: data.shipping_address1,
+        address2: data.shipping_address2,
+        city: data.shipping_city,
+        state: data.shipping_state,
+        pincode: data.shipping_pincode,
+      },
+      billing: sameAsShipping
+        ? {
             fullName: data.shipping_fullName,
             mobile: data.shipping_mobile,
             email: data.shipping_email,
@@ -97,46 +113,106 @@ const Checkout = () => {
             city: data.shipping_city,
             state: data.shipping_state,
             pincode: data.shipping_pincode,
+          }
+        : {
+            fullName: data.billing_fullName,
+            mobile: data.billing_mobile,
+            email: data.billing_email,
+            address1: data.billing_address1,
+            address2: data.billing_address2,
+            city: data.billing_city,
+            state: data.billing_state,
+            pincode: data.billing_pincode,
           },
-          billing: sameAsShipping
-            ? {
-                fullName: data.shipping_fullName,
-                mobile: data.shipping_mobile,
-                email: data.shipping_email,
-                address1: data.shipping_address1,
-                address2: data.shipping_address2,
-                city: data.shipping_city,
-                state: data.shipping_state,
-                pincode: data.shipping_pincode,
+      paymentMethod,
+      items: [...cartItems],
+      totalAmount: grandTotal,
+    };
+
+    // Track PAYMENT_SUCCESS event
+    trackPaymentSuccess({ orderId, totalAmount: grandTotal, paymentMethod });
+
+    setOrderDetails(orderData);
+    setIsSubmitting(false);
+    setOrderComplete(true);
+    clearCart();
+  };
+
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    
+    // Track PAYMENT_INITIATED event with deduplication
+    trackPaymentInitiated({ paymentMethod, amount: grandTotal });
+
+    if (paymentMethod === 'card') {
+      try {
+        const orderData = await createRazorpayOrder(grandTotal, 'USD');
+
+        const options = {
+          key: process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder', 
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'ReviveX',
+          description: 'Order Checkout',
+          order_id: orderData.id,
+          handler: async function (response) {
+            try {
+              const verifyResult = await verifyRazorpayPayment({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              });
+
+              if (verifyResult.success) {
+                handleOrderSuccess(data);
+              } else {
+                trackPaymentFailed({ reason: 'Payment Verification Failed', amount: grandTotal });
+                setIsSubmitting(false);
+                alert("Payment verification failed!");
               }
-            : {
-                fullName: data.billing_fullName,
-                mobile: data.billing_mobile,
-                email: data.billing_email,
-                address1: data.billing_address1,
-                address2: data.billing_address2,
-                city: data.billing_city,
-                state: data.billing_state,
-                pincode: data.billing_pincode,
-              },
-          paymentMethod,
-          items: [...cartItems],
-          totalAmount: grandTotal,
+            } catch (err) {
+              trackPaymentFailed({ reason: err.message, amount: grandTotal });
+              setIsSubmitting(false);
+            }
+          },
+          prefill: {
+            name: data.shipping_fullName,
+            email: data.shipping_email,
+            contact: data.shipping_mobile,
+          },
+          theme: {
+            color: '#6366f1',
+          },
         };
+        
+        if (!window.Razorpay) {
+           alert("Razorpay SDK failed to load. Are you online?");
+           setIsSubmitting(false);
+           return;
+        }
 
-        // Track PAYMENT_SUCCESS event
-        trackPaymentSuccess({ orderId, totalAmount: grandTotal, paymentMethod });
-
-        setOrderDetails(orderData);
-        setIsSubmitting(false);
-        setOrderComplete(true);
-        clearCart();
+        const rzp1 = new window.Razorpay(options);
+        rzp1.on('payment.failed', function (response){
+          trackPaymentFailed({ reason: response.error.description, amount: grandTotal });
+          setIsSubmitting(false);
+        });
+        rzp1.open();
       } catch (err) {
-        // Track PAYMENT_FAILED event
         trackPaymentFailed({ reason: err.message, amount: grandTotal });
         setIsSubmitting(false);
+        alert("Could not initialize payment. Please try again.");
       }
-    }, 1500);
+    } else {
+      // Simulate COD processing
+      setTimeout(() => {
+        try {
+          handleOrderSuccess(data);
+        } catch (err) {
+          trackPaymentFailed({ reason: err.message, amount: grandTotal });
+          setIsSubmitting(false);
+        }
+      }, 1500);
+    }
   };
 
   // Helper gradients for image placeholders

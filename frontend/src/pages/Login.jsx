@@ -50,23 +50,22 @@ const Login = () => {
   return (
     <div className="min-h-[calc(100vh-64px)] flex">
 
-      {/* ── LEFT PANEL — Brand ── */}
       <div
         className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 60%, #1a1a3e 100%)' }}
+        style={{ background: 'var(--gradient-hero)' }}
       >
         {/* Decorative blobs */}
         <div
           className="absolute -top-20 -left-20 w-72 h-72 rounded-full opacity-20 blob"
-          style={{ background: 'radial-gradient(circle, #6366f1, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, var(--color-brand-500), transparent 70%)' }}
         />
         <div
           className="absolute bottom-10 -right-20 w-64 h-64 rounded-full opacity-15 blob-delayed"
-          style={{ background: 'radial-gradient(circle, #8b5cf6, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, var(--color-violet-brand), transparent 70%)' }}
         />
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #06b6d4, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, var(--color-cyan-brand), transparent 70%)' }}
         />
 
         {/* Grid texture */}
@@ -82,7 +81,7 @@ const Login = () => {
         <div className="relative z-10 flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-xl"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+            style={{ background: 'var(--gradient-brand)' }}
           >
             <Zap size={20} className="text-white" fill="currentColor" />
           </div>
@@ -90,7 +89,7 @@ const Login = () => {
             <span
               className="text-2xl font-extrabold tracking-tight"
               style={{
-                background: 'linear-gradient(90deg, #818cf8, #c084fc)',
+                background: 'linear-gradient(90deg, #14b8a6, #8b5cf6)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
@@ -109,7 +108,7 @@ const Login = () => {
               Recover Lost Revenue{' '}
               <span
                 style={{
-                  background: 'linear-gradient(90deg, #818cf8, #e879f9)',
+                  background: 'linear-gradient(90deg, #2dd4bf, #c084fc)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
@@ -172,18 +171,17 @@ const Login = () => {
       <div className="flex-1 flex items-center justify-center px-6 py-12 bg-white lg:bg-slate-50">
         <div className="w-full max-w-md">
 
-          {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2.5 mb-8 justify-center">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+              style={{ background: 'var(--gradient-brand)' }}
             >
               <Zap size={17} className="text-white" fill="currentColor" />
             </div>
             <span
               className="text-2xl font-extrabold"
               style={{
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                background: 'var(--gradient-brand)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
@@ -203,7 +201,7 @@ const Login = () => {
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Select Role</p>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { role: 'admin', label: 'System Admin', sub: 'Full Analytics Access', Icon: Shield, color: '#6366f1' },
+                { role: 'admin', label: 'System Admin', sub: 'Full Analytics Access', Icon: Shield, color: '#14b8a6' },
                 { role: 'user',  label: 'Customer',     sub: 'E-Commerce Shopping',  Icon: User,   color: '#8b5cf6' },
               ].map(({ role, label, sub, Icon, color }) => (
                 <button
@@ -295,21 +293,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl text-white font-bold text-sm transition-all duration-200 mt-2 disabled:opacity-70"
-              style={{
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                boxShadow: '0 4px 16px rgba(99,102,241,0.35)'
-              }}
-              onMouseEnter={e => {
-                if (!loading) {
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(99,102,241,0.5)';
-                }
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 16px rgba(99,102,241,0.35)';
-              }}
+              className="btn btn-primary w-full flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl text-white font-bold text-sm transition-all duration-200 mt-2 disabled:opacity-70"
             >
               {loading ? (
                 <>

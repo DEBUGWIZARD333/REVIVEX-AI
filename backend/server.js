@@ -21,6 +21,7 @@ import notificationRoutes from './src/routes/notificationRoutes.js';
 import recoveryWorkflowRoutes from './src/routes/recoveryWorkflowRoutes.js';
 import recoveryAnalyticsRoutes from './src/routes/recoveryAnalyticsRoutes.js';
 import testingRoutes from './src/routes/testingRoutes.js';
+import paymentRoutes from './src/routes/paymentRoutes.js';
 import { getRecoveryEvents, getRecoveryMetrics, getRecoverySummary } from './src/controllers/recoveryAnalyticsController.js';
 import { protect } from './src/middlewares/authMiddleware.js';
 import { startMonitoringAgent } from './src/services/monitoringAgentService.js';
@@ -60,6 +61,7 @@ app.use('/api/email', emailRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/recovery-workflow', recoveryWorkflowRoutes);
 app.use('/api/testing', testingRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // Mount Recovery Analytics APIs
 app.use('/api/recovery-analytics', recoveryAnalyticsRoutes);

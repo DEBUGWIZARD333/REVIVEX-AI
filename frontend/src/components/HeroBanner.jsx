@@ -10,21 +10,21 @@ const trustBadges = [
 
 const HeroBanner = () => {
   return (
-    <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #1a1a3e 100%)' }}>
+    <div className="relative overflow-hidden" style={{ background: 'var(--gradient-hero)' }}>
       {/* Animated blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className="blob absolute -top-40 -left-40 w-96 h-96 opacity-20"
-          style={{ background: 'radial-gradient(circle, #6366f1, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, var(--color-brand-500), transparent 70%)' }}
         />
         <div
           className="blob-delayed absolute top-1/2 -right-40 w-80 h-80 opacity-15"
-          style={{ background: 'radial-gradient(circle, #8b5cf6, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, var(--color-violet-brand), transparent 70%)' }}
         />
         <div
-          className="absolute bottom-0 left-1/3 w-64 h-64 opacity-10 animate-float"
+          className="absolute bottom-0 left-1/3 w-64 h-64 opacity-20 animate-float"
           style={{
-            background: 'radial-gradient(circle, #06b6d4, transparent 70%)',
+            background: 'radial-gradient(circle, var(--color-cyan-brand), transparent 70%)',
             animationDelay: '1s'
           }}
         />
@@ -46,21 +46,21 @@ const HeroBanner = () => {
             {/* Label pill */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold mb-6"
               style={{
-                background: 'rgba(99,102,241,0.15)',
-                border: '1px solid rgba(99,102,241,0.3)',
-                color: '#a5b4fc'
+                background: 'rgba(20,184,166,0.15)',
+                border: '1px solid rgba(20,184,166,0.3)',
+                color: 'var(--color-brand-300)'
               }}>
               <Zap size={12} fill="currentColor" />
               AI-Powered E-Commerce Platform
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-              Premium Products for{' '}
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white leading-tight mb-6 tracking-tight">
+              Welcome to{' '}
               <span
                 className="block mt-1"
                 style={{
-                  background: 'linear-gradient(90deg, #818cf8 0%, #a78bfa 40%, #e879f9 70%, #c084fc 100%)',
+                  background: 'linear-gradient(90deg, #14b8a6 0%, #2dd4bf 25%, #8b5cf6 50%, #c084fc 75%, #14b8a6 100%)',
                   backgroundSize: '200% auto',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -68,7 +68,7 @@ const HeroBanner = () => {
                   animation: 'shimmer 4s linear infinite'
                 }}
               >
-                Modern Living
+                REVIVE-X
               </span>
             </h1>
 
@@ -82,20 +82,10 @@ const HeroBanner = () => {
                 to="/shop"
                 className="btn btn-primary group relative overflow-hidden text-base px-8 py-4 rounded-2xl font-bold"
                 style={{
-                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                  boxShadow: '0 8px 32px rgba(99,102,241,0.4)',
                   display: 'inline-flex', alignItems: 'center', gap: '8px',
-                  color: '#fff', textDecoration: 'none', fontWeight: 700,
+                  textDecoration: 'none', fontWeight: 700,
                   fontSize: '15px', borderRadius: '16px', padding: '14px 32px',
                   transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 12px 40px rgba(99,102,241,0.55)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(99,102,241,0.4)';
                 }}
               >
                 <ShoppingBag size={18} />
@@ -128,23 +118,25 @@ const HeroBanner = () => {
           </div>
 
           {/* ── Right: Visual Card ── */}
-          <div className="flex-1 w-full max-w-lg">
+          <div className="flex-1 w-full max-w-lg relative animate-float">
+            {/* Ambient glow behind card */}
+            <div className="absolute inset-0 bg-brand-500 rounded-3xl blur-[80px] opacity-20 animate-pulse-glow" />
             <div
-              className="relative rounded-3xl overflow-hidden"
+              className="relative rounded-3xl overflow-hidden shadow-2xl"
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(20,184,166,0.3)',
                 padding: '32px',
-                backdropFilter: 'blur(20px)'
+                backdropFilter: 'blur(32px)'
               }}
             >
               {/* Floating stat cards */}
               <div className="grid grid-cols-2 gap-4 mb-4">
                 {[
-                  { value: '₹2.4M', label: 'Revenue Recovered', color: '#10b981' },
-                  { value: '94%',   label: 'Recovery Rate',      color: '#6366f1' },
-                  { value: '10K+',  label: 'Happy Customers',    color: '#8b5cf6' },
-                  { value: '< 2s',  label: 'Alert Speed',        color: '#06b6d4' },
+                  { value: '₹2.4M', label: 'Revenue Recovered', color: 'var(--color-brand-400)' },
+                  { value: '94%',   label: 'Recovery Rate',      color: 'var(--color-violet-brand)' },
+                  { value: '10K+',  label: 'Happy Customers',    color: '#a78bfa' },
+                  { value: '< 2s',  label: 'Alert Speed',        color: 'var(--color-cyan-brand)' },
                 ].map((stat, i) => (
                   <div
                     key={i}
