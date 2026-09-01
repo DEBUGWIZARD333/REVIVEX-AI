@@ -4,7 +4,7 @@ import RecoveryToken from '../models/RecoveryToken.js';
 import Cart from '../models/Cart.js';
 import * as agentLogService from './agentLogService.js';
 
-const CLIENT_APP_URL = process.env.CLIENT_APP_URL || 'http://localhost:5173';
+const CLIENT_APP_URL = process.env.CLIENT_APP_URL || 'http://localhost:5176';
 
 /**
  * Generate Secure Recovery Link

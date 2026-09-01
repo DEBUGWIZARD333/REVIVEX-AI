@@ -1,4 +1,5 @@
 import * as agentLogService from './agentLogService.js';
+import nodemailer from 'nodemailer';
 
 /**
  * 1. Email Templates Library
@@ -111,10 +112,43 @@ export const renderTemplate = (templateKey, variables = {}) => {
 };
 
 /**
- * 3. Mock Email Dispatch Function
+ * 3. Real SMTP / Nodemailer Email Dispatch Function
  */
 const mockDispatchEmail = async (to, rendered) => {
-  // Simulates email gateway dispatch (SMTP / SendGrid / SES)
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      const smtpPass = (process.env.SMTP_PASS || '').replace(/\s+/g, '');
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT, 10) || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: smtpPass,
+        },
+      });
+
+      const info = await transporter.sendMail({
+        from: `"${process.env.SMTP_FROM_NAME || 'ReviveX Recovery'}" <${process.env.SMTP_USER}>`,
+        to,
+        subject: rendered.subject,
+        html: rendered.html,
+      });
+
+      console.log(`[EmailService] SMTP delivered email to ${to} (Message ID: ${info.messageId})`);
+      return {
+        messageId: info.messageId,
+        to,
+        templateKey: rendered.templateKey,
+        subject: rendered.subject,
+        sentAt: new Date().toISOString(),
+      };
+    } catch (err) {
+      console.warn('[EmailService] SMTP Exception, falling back to logger:', err.message);
+    }
+  }
+
+  console.log(`[EmailService] Dispatched recovery email to ${to} (Subject: "${rendered.subject}")`);
   return {
     messageId: `MSG-REVIVE-${Math.floor(100000 + Math.random() * 900000)}`,
     to,

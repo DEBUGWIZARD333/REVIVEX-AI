@@ -1,54 +1,137 @@
-import { Monitor, Shirt, Home, Watch, ArrowRight } from 'lucide-react';
+import { Monitor, Shirt, House, Watch, ArrowRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const categories = [
-  { id: 1, name: 'Electronics', icon: Monitor, color: 'text-blue-500', bg: 'bg-blue-50' },
-  { id: 2, name: 'Clothing', icon: Shirt, color: 'text-pink-500', bg: 'bg-pink-50' },
-  { id: 3, name: 'Home & Kitchen', icon: Home, color: 'text-amber-500', bg: 'bg-amber-50' },
-  { id: 4, name: 'Accessories', icon: Watch, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  {
+    id: 1,
+    name: 'Electronics',
+    sub: 'Phones, Laptops & More',
+    icon: Monitor,
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    lightBg: 'rgba(102,126,234,0.08)',
+    border: 'rgba(102,126,234,0.15)',
+    count: '2.4K+ items',
+  },
+  {
+    id: 2,
+    name: 'Clothing',
+    sub: 'Fashion & Apparel',
+    icon: Shirt,
+    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    lightBg: 'rgba(240,147,251,0.08)',
+    border: 'rgba(240,147,251,0.15)',
+    count: '1.8K+ items',
+  },
+  {
+    id: 3,
+    name: 'Home & Kitchen',
+    sub: 'Décor, Appliances',
+    icon: House,
+    gradient: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)',
+    lightBg: 'rgba(247,151,30,0.08)',
+    border: 'rgba(247,151,30,0.15)',
+    count: '3.1K+ items',
+  },
+  {
+    id: 4,
+    name: 'Accessories',
+    sub: 'Watches, Bags & More',
+    icon: Watch,
+    gradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+    lightBg: 'rgba(17,153,142,0.08)',
+    border: 'rgba(17,153,142,0.15)',
+    count: '950+ items',
+  },
 ];
 
 const CategorySection = () => {
   return (
-    <div className="bg-slate-50 py-16 sm:py-24">
+    <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="sm:flex sm:items-baseline sm:justify-between">
-          <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Shop by Category</h2>
-          <Link to="/categories" className="hidden sm:block text-sm font-semibold text-brand-600 hover:text-brand-500 transition-colors">
-            Browse all categories <span aria-hidden="true">&rarr;</span>
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+          <div>
+            <div className="section-label">
+              <Sparkles size={10} />
+              Collections
+            </div>
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+              Shop by Category
+            </h2>
+            <p className="mt-2 text-slate-500 text-sm">
+              Explore our hand-picked categories with the best deals
+            </p>
+          </div>
+          <Link
+            to="/shop"
+            className="flex items-center gap-1.5 text-sm font-bold text-brand-600 hover:text-brand-700 transition-colors group flex-shrink-0"
+          >
+            Browse all
+            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform duration-200" />
           </Link>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
-          {categories.map((category) => {
-            const Icon = category.icon;
+        {/* Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {categories.map((cat, i) => {
+            const Icon = cat.icon;
             return (
-              <div
-                key={category.id}
-                className="group relative bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              <Link
+                key={cat.id}
+                to={`/shop?category=${encodeURIComponent(cat.name)}`}
+                className="group relative flex flex-col p-6 rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer"
+                style={{
+                  background: cat.lightBg,
+                  borderColor: cat.border,
+                  animation: `slide-up 0.4s ease ${i * 80}ms both`
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.1)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               >
-                <div className={`w-14 h-14 rounded-xl ${category.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <Icon className={`${category.color}`} size={28} />
+                {/* Glow blob */}
+                <div
+                  className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full opacity-0 group-hover:opacity-30 transition-opacity duration-500 blur-2xl"
+                  style={{ background: cat.gradient }}
+                />
+
+                {/* Icon */}
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
+                  style={{ background: cat.gradient }}
+                >
+                  <Icon size={26} className="text-white" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-brand-600 transition-colors">
-                  <span className="absolute inset-0" />
-                  {category.name}
+
+                {/* Text */}
+                <h3 className="text-lg font-extrabold text-slate-900 mb-1 group-hover:text-slate-800">
+                  {cat.name}
                 </h3>
-                <p className="text-sm text-slate-500 flex items-center">
-                  Shop now <ArrowRight size={14} className="ml-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
-                </p>
-              </div>
+                <p className="text-sm text-slate-500 mb-4">{cat.sub}</p>
+
+                {/* Count + arrow */}
+                <div className="mt-auto flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-400">{cat.count}</span>
+                  <div
+                    className="flex items-center gap-1 text-xs font-bold opacity-0 group-hover:opacity-100 translate-x-[-4px] group-hover:translate-x-0 transition-all duration-300"
+                    style={{ color: '#6366f1' }}
+                  >
+                    Explore
+                    <ArrowRight size={13} />
+                  </div>
+                </div>
+              </Link>
             );
           })}
         </div>
-
-        <div className="mt-6 sm:hidden">
-          <Link to="/categories" className="block text-sm font-semibold text-brand-600 hover:text-brand-500">
-            Browse all categories <span aria-hidden="true">&rarr;</span>
-          </Link>
-        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

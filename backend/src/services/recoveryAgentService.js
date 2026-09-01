@@ -3,6 +3,7 @@ import DecisionEvent from '../models/DecisionEvent.js';
 import * as agentLogService from './agentLogService.js';
 import { sendWhatsAppRecoveryNotification } from './whatsappService.js';
 import { sendDirectCellularSMS } from './smsService.js';
+import { sendEmailWithRetry } from './emailService.js';
 import { sendNotification } from './notificationService.js';
 
 const AGENT_NAME = 'RecoveryAgentCore';
@@ -47,20 +48,40 @@ export const executeRecoveryAction = async (actionType, decisionData) => {
 
   switch (actionType) {
     case 'SMS': {
-      const smsMsg = `ReviveX Recovery: Hi ${customerName}, you left items ($${cartValue.toFixed(2)}) in your cart. Checkout now: http://localhost:5173/checkout?recovery=true`;
+      const smsMsg = `ReviveX Recovery: Hi ${customerName}, you left items ($${cartValue.toFixed(2)}) in your cart. Checkout now: http://localhost:5176/cart?recovery=true`;
+      
+      // 1. Dispatch Cellular SMS
       const smsResult = await sendDirectCellularSMS({
         userId: decisionData.userId?._id || decisionData.userId,
         phone: userPhone,
         message: smsMsg,
       });
 
+      // 2. Dispatch Recovery Email
+      let emailResult = null;
+      try {
+        emailResult = await sendEmailWithRetry({
+          to: userEmail,
+          templateName: 'CART_REMINDER',
+          variables: {
+            customerName,
+            cartTotal: cartValue,
+            recoveryLink: 'http://localhost:5176/cart?recovery=true',
+          },
+        });
+      } catch (e) {
+        console.warn('[RecoveryAgentCore] Email dispatch warning:', e.message);
+      }
+
       return {
-        actionType: 'SMS',
+        actionType: 'SMS_AND_EMAIL',
         recoveryAmount: cartValue,
         details: {
           phone: smsResult.phone,
+          emailSentTo: userEmail,
           message: smsMsg,
           smsDispatched: smsResult.smsDispatched,
+          emailDispatched: !!emailResult?.success,
           gatewayUsed: smsResult.gatewayUsed,
         },
       };
@@ -73,14 +94,14 @@ export const executeRecoveryAction = async (actionType, decisionData) => {
         customerName,
         eventType: decisionData.riskEventId?.eventType || 'CART_ABANDONED',
         amount: cartValue,
-        recoveryLink: `http://localhost:5173/checkout?recovery=true`,
+        recoveryLink: `http://localhost:5176/cart?recovery=true`,
       });
 
       // Also trigger direct SMS
       await sendDirectCellularSMS({
         userId: decisionData.userId?._id || decisionData.userId,
         phone: userPhone,
-        message: `ReviveX Cart Recovery: Hi ${customerName}, you left items ($${cartValue.toFixed(2)}) in your cart. Checkout: http://localhost:5173/checkout?recovery=true`,
+        message: `ReviveX Cart Recovery: Hi ${customerName}, you left items ($${cartValue.toFixed(2)}) in your cart. Checkout: http://localhost:5176/cart?recovery=true`,
       });
 
       // Dispatch in-app notification for customer UI

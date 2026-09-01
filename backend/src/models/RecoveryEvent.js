@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export const RECOVERY_ACTION_TYPES = ['RECOVERY_LINK', 'COUPON', 'EMAIL', 'NOTIFICATION', 'WHATSAPP', 'SMS'];
+export const RECOVERY_ACTION_TYPES = ['RECOVERY_LINK', 'COUPON', 'EMAIL', 'NOTIFICATION', 'WHATSAPP', 'SMS', 'SMS_AND_EMAIL', 'COUPON_SMS_AND_EMAIL'];
 export const RECOVERY_STATUSES = ['PENDING', 'SENT', 'COMPLETED', 'FAILED'];
 
 const recoveryEventSchema = new mongoose.Schema(

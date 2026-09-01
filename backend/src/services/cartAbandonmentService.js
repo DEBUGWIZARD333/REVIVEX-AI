@@ -84,13 +84,13 @@ export const detectAbandonedCarts = async (abandonmentMinutesOverride = null) =>
       continue;
     }
 
-    // 3. Prevent duplicate RiskEvents for the same user cart within 24 hours
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    // 3. Prevent duplicate RiskEvents for the same user cart within 5 minutes (for seamless rapid testing)
+    const recentWindow = new Date(now.getTime() - 5 * 60 * 1000);
     const existingOpenRiskEvent = await RiskEvent.findOne({
       userId,
       eventType: 'CART_ABANDONED',
       status: { $in: ['OPEN', 'REVIEWED'] },
-      detectedAt: { $gte: yesterday },
+      detectedAt: { $gte: recentWindow },
     });
 
     if (existingOpenRiskEvent) {

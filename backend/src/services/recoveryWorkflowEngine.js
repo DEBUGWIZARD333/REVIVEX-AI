@@ -55,19 +55,43 @@ export class RecoveryWorkflowEngine {
         );
         stepsExecuted.push(`Generated Recovery Link: ${linkResult.recoveryLink}`);
 
-        // Step B: Send Cellular SMS directly to registered phone number
+        // Step B: Generate Discount Coupon Code
+        const couponResult = await couponService.generateCoupon({
+          riskScore: evt.riskScore || 75,
+          userId: evt.userId,
+          riskEventId: evt.riskEventId || evt._id,
+        });
+        stepsExecuted.push(`Generated ${couponResult.discountPercentage}% Coupon: ${couponResult.couponCode}`);
+
+        // Step C: Send Cellular SMS with 1-Click Link & Coupon Code to registered mobile number
         const customerName = evt.userName || evt.name || 'Valued Customer';
         const smsResult = await sendDirectCellularSMS({
           userId: evt.userId,
-          message: `ReviveX Recovery: Hi ${customerName}, items ($${(evt.riskAmount || 0).toFixed(2)}) are waiting in your cart. Complete checkout: ${linkResult.recoveryLink}`,
+          message: `ReviveX Recovery: Hi ${customerName}, you left items ($${(evt.riskAmount || 0).toFixed(2)})! Use code ${couponResult.couponCode} for ${couponResult.discountPercentage}% OFF. 1-Click Checkout: ${linkResult.recoveryLink}`,
         });
         stepsExecuted.push(`Dispatched Cellular SMS to customer phone: ${smsResult.phone}`);
+
+        // Step D: Send Email with Coupon Offer & 1-Click Link to registered email address
+        const recipientEmail = evt.userEmail || evt.email || 'customer@example.com';
+        await emailService.sendEmailWithRetry({
+          to: recipientEmail,
+          templateName: 'COUPON_OFFER',
+          variables: {
+            customerName,
+            recoveryLink: linkResult.recoveryLink,
+            couponCode: couponResult.couponCode,
+            discountPercentage: couponResult.discountPercentage,
+            cartTotal: evt.riskAmount || 0,
+          },
+        });
+        stepsExecuted.push(`Sent COUPON_OFFER recovery email to registered email: ${recipientEmail}`);
 
         return {
           actionType: 'SMS',
           details: {
             recoveryLink: linkResult.recoveryLink,
             phone: smsResult.phone,
+            emailSentTo: recipientEmail,
             smsDispatched: smsResult.smsDispatched,
             gatewayUsed: smsResult.gatewayUsed,
             stepsExecuted,
@@ -147,9 +171,14 @@ export class RecoveryWorkflowEngine {
           { recoveryAmount: evt.riskAmount || 0 }
         );
 
-        // Step C: Send Email with Coupon Offer
-        const recipientEmail = evt.userEmail || evt.email || 'customer@example.com';
-        const customerName = evt.userName || evt.name || 'VIP Customer';
+        // Step C: Send Email with Coupon Offer to registered user
+        let userDoc = null;
+        if (evt.userId) {
+          userDoc = await mongoose.model('User').findById(evt.userId?._id || evt.userId);
+        }
+
+        const recipientEmail = userDoc?.email || evt.userEmail || evt.email || 'customer@example.com';
+        const customerName = userDoc?.name || evt.userName || evt.name || 'VIP Customer';
 
         await emailService.sendEmailWithRetry({
           to: recipientEmail,
@@ -161,15 +190,23 @@ export class RecoveryWorkflowEngine {
             discountPercentage: couponResult.discountPercentage,
           },
         });
-        stepsExecuted.push(`Sent COUPON_OFFER email to ${recipientEmail}`);
+        // Step D: Send Cellular SMS with Coupon Offer to registered mobile number
+        const smsResult = await sendDirectCellularSMS({
+          userId: evt.userId,
+          message: `ReviveX VIP Offer: Hi ${customerName}, get ${couponResult.discountPercentage}% OFF with code ${couponResult.couponCode}! Checkout: ${linkResult.recoveryLink}`,
+        });
+        stepsExecuted.push(`Dispatched Cellular SMS to customer phone: ${smsResult.phone}`);
 
         return {
-          actionType: 'COUPON',
+          actionType: 'COUPON_SMS_AND_EMAIL',
           details: {
             couponCode: couponResult.couponCode,
             discountPercentage: couponResult.discountPercentage,
             recoveryLink: linkResult.recoveryLink,
+            phone: smsResult.phone,
             emailSentTo: recipientEmail,
+            smsDispatched: smsResult.smsDispatched,
+            gatewayUsed: smsResult.gatewayUsed,
             stepsExecuted,
           },
         };
