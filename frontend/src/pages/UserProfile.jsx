@@ -12,6 +12,7 @@ const UserProfile = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [testLoading, setTestLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -45,6 +46,34 @@ const UserProfile = () => {
       setErrorMsg(err.response?.data?.message || 'Failed to update profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTestAlerts = async () => {
+    setSuccessMsg('');
+    setErrorMsg('');
+    setTestLoading(true);
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/notifications/test-alerts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setSuccessMsg(`Test alerts dispatched! Check your phone (${formData.phone}) and email (${formData.email}).`);
+      } else {
+        setErrorMsg(data.message || 'Failed to dispatch test alerts');
+      }
+    } catch (err) {
+      setErrorMsg(err.message || 'Error triggering test alerts');
+    } finally {
+      setTestLoading(false);
     }
   };
 
@@ -185,6 +214,29 @@ const UserProfile = () => {
               {loading ? 'Saving Changes...' : 'Save Profile & Mobile Phone Number'}
             </button>
           </form>
+        </div>
+
+        {/* Test Communication Channels Card */}
+        <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 space-y-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">Test Communication Channels</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Instantly trigger a test SMS (via Pushbullet/Fast2SMS) and Email (via SMTP) to your registered credentials.
+              </p>
+            </div>
+            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+              <MessageSquare size={24} />
+            </div>
+          </div>
+          
+          <button
+            onClick={handleTestAlerts}
+            disabled={testLoading}
+            className="w-full flex items-center justify-center py-3.5 px-6 border border-transparent text-sm font-extrabold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition shadow-md disabled:opacity-70"
+          >
+            {testLoading ? 'Dispatching Test Alerts...' : 'Send Test SMS & Email Now'}
+          </button>
         </div>
 
       </div>

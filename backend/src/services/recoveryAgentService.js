@@ -48,7 +48,8 @@ export const executeRecoveryAction = async (actionType, decisionData) => {
 
   switch (actionType) {
     case 'SMS': {
-      const smsMsg = `ReviveX Recovery: Hi ${customerName}, you left items ($${cartValue.toFixed(2)}) in your cart. Checkout now: http://localhost:5176/cart?recovery=true`;
+      const appUrl = process.env.CLIENT_APP_URL || 'http://localhost:5173';
+      const smsMsg = `ReviveX Recovery: Hi ${customerName}, you left items ($${cartValue.toFixed(2)}) in your cart. Checkout now: ${appUrl}/cart?recovery=true`;
       
       // 1. Dispatch Cellular SMS
       const smsResult = await sendDirectCellularSMS({
@@ -66,7 +67,7 @@ export const executeRecoveryAction = async (actionType, decisionData) => {
           variables: {
             customerName,
             cartTotal: cartValue,
-            recoveryLink: 'http://localhost:5176/cart?recovery=true',
+            recoveryLink: `${appUrl}/cart?recovery=true`,
           },
         });
       } catch (e) {
@@ -87,21 +88,21 @@ export const executeRecoveryAction = async (actionType, decisionData) => {
       };
     }
 
-    case 'WHATSAPP': {
+      const appUrl = process.env.CLIENT_APP_URL || 'http://localhost:5173';
       const waResult = await sendWhatsAppRecoveryNotification({
         userId: decisionData.userId?._id || decisionData.userId,
         phone: userPhone,
         customerName,
         eventType: decisionData.riskEventId?.eventType || 'CART_ABANDONED',
         amount: cartValue,
-        recoveryLink: `http://localhost:5176/cart?recovery=true`,
+        recoveryLink: `${appUrl}/cart?recovery=true`,
       });
 
       // Also trigger direct SMS
       await sendDirectCellularSMS({
         userId: decisionData.userId?._id || decisionData.userId,
         phone: userPhone,
-        message: `ReviveX Cart Recovery: Hi ${customerName}, you left items ($${cartValue.toFixed(2)}) in your cart. Checkout: http://localhost:5176/cart?recovery=true`,
+        message: `ReviveX Cart Recovery: Hi ${customerName}, you left items ($${cartValue.toFixed(2)}) in your cart. Checkout: ${appUrl}/cart?recovery=true`,
       });
 
       // Dispatch in-app notification for customer UI
@@ -114,7 +115,7 @@ export const executeRecoveryAction = async (actionType, decisionData) => {
             variables: {
               customerName,
               cartTotal: cartValue,
-              recoveryLink: `http://localhost:5173/checkout?recovery=true`,
+              recoveryLink: `${appUrl}/cart?recovery=true`,
             },
           });
         } catch (e) {
@@ -149,8 +150,9 @@ export const executeRecoveryAction = async (actionType, decisionData) => {
     }
 
     case 'RECOVERY_LINK': {
+      const appUrl = process.env.CLIENT_APP_URL || 'http://localhost:5173';
       const sessionId = decisionData.riskEventId?._id || 'SESS-RECOVERY';
-      const recoveryLink = `http://localhost:5173/checkout?recovery=true&session=${sessionId}`;
+      const recoveryLink = `${appUrl}/checkout?recovery=true&session=${sessionId}`;
       return {
         actionType: 'RECOVERY_LINK',
         recoveryAmount: cartValue,
