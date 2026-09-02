@@ -26,7 +26,6 @@ const AppRoutes = () => {
       <Route path="/products" element={<ProductList />} />
       <Route path="/products/:id" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart />} />
-      <Route path="/checkout" element={<Checkout />} />
       <Route path="/recover/cart/:token" element={<RecoveryLinkHandler />} />
       <Route path="/analytics" element={<ReviveXAnalyticsDashboard />} />
       <Route path="/analytics-dashboard" element={<ReviveXAnalyticsDashboard />} />
@@ -40,6 +39,7 @@ const AppRoutes = () => {
 
       {/* Protected User & Admin Routes */}
       <Route element={<ProtectedRoute />}>
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/dashboard" element={<MonitoringDashboard />} />
         <Route path="/risk-dashboard" element={<RiskMonitoringDashboard />} />
         <Route path="/decision-dashboard" element={<DecisionDashboard />} />

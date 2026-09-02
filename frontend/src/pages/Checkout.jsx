@@ -146,10 +146,10 @@ const Checkout = () => {
 
     if (paymentMethod === 'card') {
       try {
-        const orderData = await createRazorpayOrder(grandTotal, 'USD');
+        const orderData = await createRazorpayOrder(grandTotal, 'INR');
 
         const options = {
-          key: process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder', 
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TX5c2uLS77SI6Q', 
           amount: orderData.amount,
           currency: orderData.currency,
           name: 'ReviveX',

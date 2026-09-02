@@ -2,7 +2,7 @@ import User from '../models/User.js';
 import { generateToken } from '../utils/jwt.js';
 
 export const registerUser = async (userData) => {
-  const { name, email, phone, password, role } = userData;
+  const { name, email, phone, password } = userData;
 
   // Check if user exists
   const userExists = await User.findOne({ email });
@@ -11,13 +11,13 @@ export const registerUser = async (userData) => {
     throw new Error('User already exists');
   }
 
-  // Create user
+  // Create user - Force role to be 'user' for public registration
   const user = await User.create({
     name,
     email,
     phone: phone || '+1 (555) 234-5678',
     password,
-    role: role || 'user',
+    role: 'user',
   });
 
   if (user) {

@@ -88,6 +88,7 @@ export const executeRecoveryAction = async (actionType, decisionData) => {
       };
     }
 
+    case 'WHATSAPP': {
       const appUrl = process.env.CLIENT_APP_URL || 'http://localhost:5173';
       const waResult = await sendWhatsAppRecoveryNotification({
         userId: decisionData.userId?._id || decisionData.userId,
