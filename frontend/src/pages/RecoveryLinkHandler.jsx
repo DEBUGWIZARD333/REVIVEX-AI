@@ -39,10 +39,28 @@ const RecoveryLinkHandler = () => {
           setStatus('valid');
           setRecoveryData(data);
 
-          // If cart items were restored, update local cart state
-          if (data.cartItems && Array.isArray(data.cartItems) && data.cartItems.length > 0) {
-            setCartItems(data.cartItems);
+          // If auth token was returned, authenticate session so cart and user profile are loaded
+          if (data.authToken) {
+            localStorage.setItem('token', data.authToken);
           }
+
+          // If cart items were restored, update local cart state with CartContext standard format
+          if (data.cartItems && Array.isArray(data.cartItems) && data.cartItems.length > 0) {
+            const formattedItems = data.cartItems.map((item) => ({
+              _id: item._id,
+              product: item.productId || item.product || item,
+              quantity: item.quantity || 1,
+            }));
+            setCartItems(formattedItems);
+            // Save to local storage for guests as well
+            localStorage.setItem('guestCart', JSON.stringify(formattedItems));
+          }
+
+          // Automatically redirect to cart page after briefly showing success message
+          const redirectTimer = setTimeout(() => {
+            navigate('/cart');
+          }, 1500);
+          return () => clearTimeout(redirectTimer);
         } else {
           if (data.isExpired) {
             setStatus('expired');
@@ -119,20 +137,21 @@ const RecoveryLinkHandler = () => {
 
           <div className="flex flex-col sm:flex-row gap-3">
             <button
-              onClick={() => navigate('/checkout')}
+              onClick={() => navigate('/cart')}
               className="flex-1 py-3.5 px-6 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2 text-sm"
             >
-              <span>Proceed to Checkout</span>
+              <ShoppingBag size={16} />
+              <span>Go to Cart Now</span>
               <ArrowRight size={16} />
             </button>
-            <Link
-              to="/cart"
+            <button
+              onClick={() => navigate('/checkout')}
               className="py-3.5 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition text-sm flex items-center justify-center space-x-2"
             >
-              <ShoppingBag size={16} />
-              <span>View Cart</span>
-            </Link>
+              <span>Direct Checkout</span>
+            </button>
           </div>
+          <p className="text-xs text-slate-400 mt-3">Redirecting you to your cart in a moment...</p>
         </div>
       </div>
     );
@@ -164,16 +183,16 @@ const RecoveryLinkHandler = () => {
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
-            to="/shop"
-            className="py-3.5 px-8 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md transition text-sm"
+            to="/cart"
+            className="py-3.5 px-8 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md transition text-sm flex items-center justify-center space-x-2"
           >
-            Continue Shopping
+            <span>Continue Shopping (Go to Cart)</span>
           </Link>
           <Link
-            to="/cart"
-            className="py-3.5 px-8 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition text-sm"
+            to="/shop"
+            className="py-3.5 px-8 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition text-sm flex items-center justify-center space-x-2"
           >
-            Go to Cart
+            <span>Browse Products</span>
           </Link>
         </div>
       </div>

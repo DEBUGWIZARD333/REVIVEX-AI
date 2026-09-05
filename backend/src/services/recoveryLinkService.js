@@ -32,25 +32,37 @@ export const generateRecoveryLink = async (userId, cartId, options = {}) => {
   const expiresInHours = options.expiresInHours ? parseInt(options.expiresInHours, 10) : 24;
   const recoveryAmount = options.recoveryAmount ? parseFloat(options.recoveryAmount) : 0;
 
-  // 2. Generate Unique Cryptographic Token
+  // 2. Capture snapshot of user's active cart items
+  let cartSnapshot = [];
+  if (validUserId) {
+    const activeCart = await Cart.find({ userId: validUserId }).populate('productId', 'name price category image');
+    cartSnapshot = activeCart.map(item => ({
+      _id: item._id,
+      product: item.productId,
+      quantity: item.quantity,
+    }));
+  }
+
+  // 3. Generate Unique Cryptographic Token
   const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + expiresInHours * 60 * 60 * 1000);
 
-  // 3. Format Output Recovery Link (e.g., http://localhost:5173/recover/cart/{token})
+  // 4. Format Output Recovery Link (e.g., http://localhost:5173/recover/cart/{token})
   const recoveryLink = `${CLIENT_APP_URL}/recover/cart/${token}`;
 
-  // 4. Save Token to Database
+  // 5. Save Token to Database with Cart Snapshot
   const tokenDoc = new RecoveryToken({
     token,
     userId: validUserId,
     cartId: validCartId,
     recoveryAmount,
+    cartItems: cartSnapshot,
     expiresAt,
     isRedeemed: false,
   });
   await tokenDoc.save();
 
-  // 5. Audit Logging
+  // 6. Audit Logging
   console.log(`[RecoveryLinkService] Generated secure recovery URL for user ${validUserId || 'guest'}: ${recoveryLink}`);
   
   await agentLogService.createAgentLog({
@@ -121,13 +133,31 @@ export const validateAndRedeemToken = async (token) => {
   tokenDoc.redeemedAt = now;
   await tokenDoc.save();
 
-  // Fetch restored cart items
+  // Fetch restored cart items: check live DB cart first, fallback to token snapshot
   let cartItems = [];
   if (tokenDoc.userId) {
-    cartItems = await Cart.find({ userId: tokenDoc.userId._id || tokenDoc.userId }).populate(
+    const liveCart = await Cart.find({ userId: tokenDoc.userId._id || tokenDoc.userId }).populate(
       'productId',
       'name price category image'
     );
+    if (liveCart && liveCart.length > 0) {
+      cartItems = liveCart;
+    } else if (tokenDoc.cartItems && tokenDoc.cartItems.length > 0) {
+      cartItems = tokenDoc.cartItems;
+    }
+  } else if (tokenDoc.cartItems && tokenDoc.cartItems.length > 0) {
+    cartItems = tokenDoc.cartItems;
+  }
+
+  // Generate authentication token so customer is automatically logged in
+  let authToken = null;
+  if (tokenDoc.userId) {
+    try {
+      const { generateToken } = await import('../utils/jwt.js');
+      authToken = generateToken(tokenDoc.userId._id || tokenDoc.userId);
+    } catch (e) {
+      console.warn('[RecoveryLinkService] JWT generate warning:', e.message);
+    }
   }
 
   console.log(`[RecoveryLinkService] Successfully validated and redeemed recovery token ${token}`);
@@ -144,6 +174,7 @@ export const validateAndRedeemToken = async (token) => {
     valid: true,
     message: 'Recovery link successfully validated and redeemed.',
     token: tokenDoc.token,
+    authToken,
     user: tokenDoc.userId,
     cartId: tokenDoc.cartId,
     cartItems,

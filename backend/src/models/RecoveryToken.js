@@ -24,6 +24,10 @@ const recoveryTokenSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    cartItems: {
+      type: Array,
+      default: [],
+    },
     expiresAt: {
       type: Date,
       required: [true, 'Expiration date is required'],

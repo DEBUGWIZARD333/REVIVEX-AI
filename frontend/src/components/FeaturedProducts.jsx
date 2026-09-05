@@ -53,20 +53,20 @@ const FeaturedProducts = () => {
     : products.filter(p => p.category?.toLowerCase().includes(activeTab.toLowerCase()));
 
   return (
-    <section className="py-20" style={{ background: '#f8fafc' }}>
+    <section className="py-20" style={{ background: 'var(--color-surface-darker)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
           <div>
-            <div className="section-label">
+            <div className="section-label" style={{ background: 'rgba(255,0,255,0.1)', borderColor: 'rgba(255,0,255,0.3)', color: 'var(--color-neon-pink)' }}>
               <TrendingUp size={10} />
               Trending Now
             </div>
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-3xl font-extrabold text-white tracking-tight" style={{ textShadow: '0 0 10px rgba(255,255,255,0.2)' }}>
               Top Picks For You
             </h2>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-2 text-sm text-slate-400">
               Our most popular products · Updated hourly
             </p>
           </div>
@@ -89,27 +89,28 @@ const FeaturedProducts = () => {
               style={
                 activeTab === tab
                   ? {
-                      background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                      color: '#fff',
-                      border: '1px solid transparent',
-                      boxShadow: '0 4px 12px rgba(99,102,241,0.3)',
+                      background: 'rgba(255,0,255,0.1)',
+                      color: 'var(--color-neon-pink)',
+                      border: '1px solid var(--color-neon-pink)',
+                      boxShadow: '0 0 15px rgba(255,0,255,0.3), inset 0 0 10px rgba(255,0,255,0.1)',
+                      textShadow: '0 0 5px var(--color-neon-pink)'
                     }
                   : {
-                      background: '#fff',
-                      color: '#64748b',
-                      border: '1px solid #e2e8f0',
+                      background: 'rgba(255,255,255,0.03)',
+                      color: '#94a3b8',
+                      border: '1px solid rgba(255,255,255,0.1)',
                     }
               }
               onMouseEnter={e => {
                 if (activeTab !== tab) {
-                  e.currentTarget.style.borderColor = '#6366f1';
-                  e.currentTarget.style.color = '#6366f1';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+                  e.currentTarget.style.color = '#fff';
                 }
               }}
               onMouseLeave={e => {
                 if (activeTab !== tab) {
-                  e.currentTarget.style.borderColor = '#e2e8f0';
-                  e.currentTarget.style.color = '#64748b';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                  e.currentTarget.style.color = '#94a3b8';
                 }
               }}
             >
@@ -135,12 +136,18 @@ const FeaturedProducts = () => {
         <div className="mt-14 text-center">
           <Link
             to="/shop"
-            className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl text-base font-bold text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+            className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl text-base font-bold text-white transition-all duration-300 relative group overflow-hidden"
+            style={{ 
+              background: 'transparent',
+              border: '1px solid var(--color-neon-pink)',
+              boxShadow: '0 0 15px rgba(255,0,255,0.2)' 
+            }}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 25px rgba(255,0,255,0.5), inset 0 0 15px rgba(255,0,255,0.2)'}
+            onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 15px rgba(255,0,255,0.2)'}
           >
-            <TrendingUp size={18} />
+            <TrendingUp size={18} className="group-hover:text-neon-pink" />
             Explore All Products
-            <ArrowRight size={16} />
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
       </div>

@@ -46,20 +46,20 @@ const categories = [
 
 const CategorySection = () => {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20" style={{ background: 'var(--color-surface-dark)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
           <div>
-            <div className="section-label">
+            <div className="section-label" style={{ background: 'rgba(0,243,255,0.1)', borderColor: 'rgba(0,243,255,0.3)', color: 'var(--color-neon-cyan)' }}>
               <Sparkles size={10} />
               Collections
             </div>
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-3xl font-extrabold text-white tracking-tight" style={{ textShadow: '0 0 10px rgba(255,255,255,0.2)' }}>
               Shop by Category
             </h2>
-            <p className="mt-2 text-slate-500 text-sm">
+            <p className="mt-2 text-slate-400 text-sm">
               Explore our hand-picked categories with the best deals
             </p>
           </div>
@@ -82,17 +82,19 @@ const CategorySection = () => {
                 to={`/shop?category=${encodeURIComponent(cat.name)}`}
                 className="group relative flex flex-col p-6 rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer"
                 style={{
-                  background: cat.lightBg,
-                  borderColor: cat.border,
+                  background: 'rgba(255,255,255,0.02)',
+                  borderColor: 'rgba(255,255,255,0.1)',
                   animation: `slide-up 0.4s ease ${i * 80}ms both`
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.transform = 'translateY(-4px)';
-                  e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.1)';
+                  e.currentTarget.style.boxShadow = `0 10px 30px ${cat.border.replace('0.15', '0.4')}, inset 0 0 15px ${cat.border.replace('0.15', '0.2')}`;
+                  e.currentTarget.style.borderColor = cat.gradient.includes('f093fb') ? 'var(--color-neon-pink)' : 'var(--color-neon-cyan)';
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
                 }}
               >
                 {/* Glow blob */}
@@ -110,17 +112,17 @@ const CategorySection = () => {
                 </div>
 
                 {/* Text */}
-                <h3 className="text-lg font-extrabold text-slate-900 mb-1 group-hover:text-slate-800">
+                <h3 className="text-lg font-extrabold text-white mb-1 group-hover:text-white" style={{ textShadow: '0 0 8px rgba(255,255,255,0.3)' }}>
                   {cat.name}
                 </h3>
-                <p className="text-sm text-slate-500 mb-4">{cat.sub}</p>
+                <p className="text-sm text-slate-400 mb-4">{cat.sub}</p>
 
                 {/* Count + arrow */}
                 <div className="mt-auto flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-400">{cat.count}</span>
+                  <span className="text-xs font-semibold text-slate-500">{cat.count}</span>
                   <div
                     className="flex items-center gap-1 text-xs font-bold opacity-0 group-hover:opacity-100 translate-x-[-4px] group-hover:translate-x-0 transition-all duration-300"
-                    style={{ color: '#6366f1' }}
+                    style={{ color: 'var(--color-neon-cyan)', textShadow: '0 0 5px var(--color-neon-cyan)' }}
                   >
                     Explore
                     <ArrowRight size={13} />

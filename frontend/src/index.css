@@ -24,9 +24,14 @@
   /* Cyan accent */
   --color-cyan-brand: #06b6d4;
 
+  /* Neon Aesthetic (Landing Page) */
+  --color-neon-cyan: #00f3ff;
+  --color-neon-pink: #ff00ff;
+  --color-neon-purple: #b026ff;
+
   /* Dark surfaces */
-  --color-surface-dark:   #09090b;
-  --color-surface-darker: #000000;
+  --color-surface-dark:   #0a0a0c;
+  --color-surface-darker: #050505;
 }
 
 /* ── Global Reset & Base ── */
@@ -39,8 +44,9 @@
 
   /* Gradients */
   --gradient-brand:      linear-gradient(135deg, #14b8a6 0%, #8b5cf6 100%);
-  --gradient-hero:       linear-gradient(135deg, #09090b 0%, #171720 50%, #000000 100%);
-  --gradient-glow:       radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.15) 0%, rgba(139, 92, 246, 0.05) 50%, transparent 100%);
+  --gradient-hero:       linear-gradient(135deg, #050505 0%, #0a0a0c 50%, #000000 100%);
+  --gradient-neon:       linear-gradient(135deg, var(--color-neon-cyan) 0%, var(--color-neon-pink) 100%);
+  --gradient-glow:       radial-gradient(circle at 50% 50%, rgba(0, 243, 255, 0.15) 0%, rgba(255, 0, 255, 0.05) 50%, transparent 100%);
   --gradient-card:       linear-gradient(135deg, #2dd4bf 0%, #8b5cf6 100%);
   --gradient-emerald:    linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   --gradient-cyan:       linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
@@ -134,8 +140,13 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-  50%       { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+  0%, 100% { box-shadow: 0 0 15px 0 rgba(0, 243, 255, 0.4); }
+  50%       { box-shadow: 0 0 30px 5px rgba(255, 0, 255, 0.4); }
+}
+
+@keyframes neon-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; text-shadow: 0 0 10px var(--color-neon-cyan), 0 0 20px var(--color-neon-cyan); }
+  20%, 24%, 55% { opacity: 0.5; text-shadow: none; }
 }
 
 @keyframes spin-slow {
@@ -209,6 +220,17 @@
 
 .bg-gradient-hero {
   background: var(--gradient-hero);
+}
+
+.bg-gradient-neon {
+  background: var(--gradient-neon);
+}
+
+.text-gradient-neon {
+  background: var(--gradient-neon);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Animated gradient border */

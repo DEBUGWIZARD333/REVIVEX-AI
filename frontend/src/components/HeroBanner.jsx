@@ -1,201 +1,119 @@
 import { Link } from 'react-router-dom';
-import { ShoppingBag, ArrowRight, Zap, TrendingUp, Shield } from 'lucide-react';
+import { ShoppingBag, ArrowRight, Zap, Shield, TrendingUp } from 'lucide-react';
 
 const trustBadges = [
   { icon: Zap,       label: 'AI-Powered Recovery' },
   { icon: TrendingUp, label: '10K+ Orders Recovered' },
   { icon: Shield,    label: 'Secure Checkout' },
-  { icon: ShoppingBag, label: 'Free Shipping ₹999+' },
 ];
 
 const HeroBanner = () => {
   return (
-    <div className="relative overflow-hidden" style={{ background: 'var(--gradient-hero)' }}>
-      {/* Animated blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="blob absolute -top-40 -left-40 w-96 h-96 opacity-20"
-          style={{ background: 'radial-gradient(circle, var(--color-brand-500), transparent 70%)' }}
-        />
-        <div
-          className="blob-delayed absolute top-1/2 -right-40 w-80 h-80 opacity-15"
-          style={{ background: 'radial-gradient(circle, var(--color-violet-brand), transparent 70%)' }}
-        />
-        <div
-          className="absolute bottom-0 left-1/3 w-64 h-64 opacity-20 animate-float"
-          style={{
-            background: 'radial-gradient(circle, var(--color-cyan-brand), transparent 70%)',
-            animationDelay: '1s'
-          }}
+    <div className="relative overflow-hidden min-h-[90vh] flex flex-col justify-center bg-gradient-hero">
+      {/* Background Ambient Glows */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
+        <div 
+          className="absolute w-[600px] h-[600px] rounded-full opacity-20 blur-[100px] animate-pulse-glow"
+          style={{ background: 'var(--gradient-glow)' }}
         />
         {/* Grid overlay */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-            backgroundSize: '60px 60px'
+            backgroundSize: '40px 40px'
           }}
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row items-center gap-12 py-20 lg:py-28">
-
-          {/* ── Left: Text Content ── */}
-          <div className="flex-1 text-center lg:text-left">
-            {/* Label pill */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold mb-6"
-              style={{
-                background: 'rgba(20,184,166,0.15)',
-                border: '1px solid rgba(20,184,166,0.3)',
-                color: 'var(--color-brand-300)'
-              }}>
-              <Zap size={12} fill="currentColor" />
-              AI-Powered E-Commerce Platform
-            </div>
-
-            {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white leading-tight mb-6 tracking-tight">
-              Welcome to{' '}
-              <span
-                className="block mt-1"
-                style={{
-                  background: 'linear-gradient(90deg, #14b8a6 0%, #2dd4bf 25%, #8b5cf6 50%, #c084fc 75%, #14b8a6 100%)',
-                  backgroundSize: '200% auto',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  animation: 'shimmer 4s linear infinite'
-                }}
-              >
-                REVIVE-X
-              </span>
-            </h1>
-
-            <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              Discover our AI-curated collection of high-quality essentials designed to elevate your everyday experience.
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link
-                to="/shop"
-                className="btn btn-primary group relative overflow-hidden text-base px-8 py-4 rounded-2xl font-bold"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '8px',
-                  textDecoration: 'none', fontWeight: 700,
-                  fontSize: '15px', borderRadius: '16px', padding: '14px 32px',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <ShoppingBag size={18} />
-                Shop Now
-                <ArrowRight size={16} style={{ marginLeft: '2px' }} />
-              </Link>
-
-              <Link
-                to="/shop"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '8px',
-                  color: '#c7d2fe', textDecoration: 'none', fontWeight: 600,
-                  fontSize: '15px', borderRadius: '16px', padding: '14px 28px',
-                  border: '1px solid rgba(165,180,252,0.25)',
-                  background: 'rgba(255,255,255,0.04)',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
-                  e.currentTarget.style.borderColor = 'rgba(165,180,252,0.5)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                  e.currentTarget.style.borderColor = 'rgba(165,180,252,0.25)';
-                }}
-              >
-                View Categories
-              </Link>
-            </div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-10 flex flex-col items-center justify-center py-20 text-center">
+        
+        {/* The Neon 'X' Logo */}
+        <div className="relative w-48 h-48 sm:w-64 sm:h-64 mb-8 mx-auto animate-float flex items-center justify-center">
+          {/* Outer glow rings for the X */}
+          <div className="absolute inset-0 bg-gradient-neon rounded-full blur-3xl opacity-30 animate-pulse-glow" />
+          
+          {/* CSS 'X' Construction mimicking the image */}
+          <div className="relative w-full h-full">
+            {/* Cyan Stroke 1 */}
+            <div className="absolute top-1/2 left-1/2 w-[120%] h-2 sm:h-3 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full shadow-[0_0_15px_var(--color-neon-cyan)]"
+                 style={{ background: 'var(--color-neon-cyan)' }} />
+            {/* Pink Stroke 2 */}
+            <div className="absolute top-1/2 left-1/2 w-[120%] h-2 sm:h-3 -translate-x-1/2 -translate-y-1/2 -rotate-45 rounded-full shadow-[0_0_15px_var(--color-neon-pink)]"
+                 style={{ background: 'var(--color-neon-pink)' }} />
+                 
+            {/* Outline layers for depth */}
+            <div className="absolute top-1/2 left-1/2 w-[110%] h-[2px] sm:h-[3px] -translate-x-1/2 -translate-y-[calc(50%+12px)] rotate-45 rounded-full shadow-[0_0_8px_var(--color-neon-cyan)]"
+                 style={{ background: 'var(--color-neon-cyan)', opacity: 0.7 }} />
+            <div className="absolute top-1/2 left-1/2 w-[110%] h-[2px] sm:h-[3px] -translate-x-1/2 -translate-y-[calc(50%-12px)] rotate-45 rounded-full shadow-[0_0_8px_var(--color-neon-cyan)]"
+                 style={{ background: 'var(--color-neon-cyan)', opacity: 0.7 }} />
+                 
+            <div className="absolute top-1/2 left-1/2 w-[110%] h-[2px] sm:h-[3px] -translate-x-1/2 -translate-y-[calc(50%+12px)] -rotate-45 rounded-full shadow-[0_0_8px_var(--color-neon-pink)]"
+                 style={{ background: 'var(--color-neon-pink)', opacity: 0.7 }} />
+            <div className="absolute top-1/2 left-1/2 w-[110%] h-[2px] sm:h-[3px] -translate-x-1/2 -translate-y-[calc(50%-12px)] -rotate-45 rounded-full shadow-[0_0_8px_var(--color-neon-pink)]"
+                 style={{ background: 'var(--color-neon-pink)', opacity: 0.7 }} />
           </div>
+        </div>
 
-          {/* ── Right: Visual Card ── */}
-          <div className="flex-1 w-full max-w-lg relative animate-float">
-            {/* Ambient glow behind card */}
-            <div className="absolute inset-0 bg-brand-500 rounded-3xl blur-[80px] opacity-20 animate-pulse-glow" />
-            <div
-              className="relative rounded-3xl overflow-hidden shadow-2xl"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(20,184,166,0.3)',
-                padding: '32px',
-                backdropFilter: 'blur(32px)'
-              }}
-            >
-              {/* Floating stat cards */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                {[
-                  { value: '₹2.4M', label: 'Revenue Recovered', color: 'var(--color-brand-400)' },
-                  { value: '94%',   label: 'Recovery Rate',      color: 'var(--color-violet-brand)' },
-                  { value: '10K+',  label: 'Happy Customers',    color: '#a78bfa' },
-                  { value: '< 2s',  label: 'Alert Speed',        color: 'var(--color-cyan-brand)' },
-                ].map((stat, i) => (
-                  <div
-                    key={i}
-                    className="p-4 rounded-2xl text-center"
-                    style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      animation: `slide-up 0.5s ease ${i * 100}ms both`
-                    }}
-                  >
-                    <div
-                      className="text-2xl font-extrabold mb-1"
-                      style={{ color: stat.color }}
-                    >
-                      {stat.value}
-                    </div>
-                    <div className="text-xs text-slate-400 font-medium">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
+        {/* Text Logo */}
+        <h1 className="text-5xl sm:text-7xl font-black mb-8 tracking-[0.2em] uppercase"
+            style={{ 
+              color: '#fff',
+              textShadow: '0 0 10px rgba(255,255,255,0.5), 0 0 20px var(--color-neon-cyan), 0 0 40px var(--color-neon-pink)'
+            }}>
+          REVIVE X
+        </h1>
 
-              {/* Live recovery status */}
-              <div
-                className="rounded-2xl p-4 flex items-center gap-3"
-                style={{
-                  background: 'rgba(16,185,129,0.08)',
-                  border: '1px solid rgba(16,185,129,0.2)'
-                }}
-              >
-                <div className="relative flex-shrink-0">
-                  <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
-                  <div className="absolute inset-0 w-3 h-3 rounded-full bg-emerald-400 opacity-30 scale-150" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-emerald-400">Live AI Recovery Active</p>
-                  <p className="text-xs text-slate-400">Monitoring cart abandonment in real-time</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <p className="text-lg sm:text-xl text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
+          The next generation of AI-powered E-Commerce. Experience seamless shopping, autonomous revenue recovery, and cyberpunk aesthetics.
+        </p>
+
+        {/* CTAs */}
+        <div className="flex flex-col sm:flex-row gap-6 justify-center w-full max-w-md mx-auto">
+          <Link
+            to="/login"
+            className="group relative overflow-hidden flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-white transition-all duration-300 w-full sm:w-auto"
+            style={{
+              background: 'rgba(0,0,0,0.4)',
+              border: '1px solid var(--color-neon-cyan)',
+              boxShadow: '0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 10px rgba(0, 243, 255, 0.1)'
+            }}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 25px rgba(0, 243, 255, 0.6), inset 0 0 15px rgba(0, 243, 255, 0.2)'}
+            onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 10px rgba(0, 243, 255, 0.1)'}
+          >
+            <ShoppingBag size={18} />
+            ENTER SHOP
+          </Link>
+
+          <Link
+            to="/login"
+            className="group relative overflow-hidden flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-white transition-all duration-300 w-full sm:w-auto"
+            style={{
+              background: 'rgba(0,0,0,0.4)',
+              border: '1px solid var(--color-neon-pink)',
+              boxShadow: '0 0 15px rgba(255, 0, 255, 0.3), inset 0 0 10px rgba(255, 0, 255, 0.1)'
+            }}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 25px rgba(255, 0, 255, 0.6), inset 0 0 15px rgba(255, 0, 255, 0.2)'}
+            onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 0, 255, 0.3), inset 0 0 10px rgba(255, 0, 255, 0.1)'}
+          >
+            EXPLORE
+            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </div>
 
-      {/* ── Trust Badges Bar ── */}
-      <div
-        className="relative border-t"
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          borderColor: 'rgba(255,255,255,0.06)'
-        }}
-      >
+      {/* Trust Badges Bar - Bottom */}
+      <div className="absolute bottom-0 left-0 right-0 border-t"
+           style={{ background: 'rgba(0,0,0,0.6)', borderColor: 'rgba(0, 243, 255, 0.2)', backdropFilter: 'blur(10px)' }}>
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
+          <div className="flex flex-wrap justify-center gap-8 sm:gap-12">
             {trustBadges.map((badge, i) => {
               const Icon = badge.icon;
               return (
-                <div key={i} className="flex items-center gap-2 text-slate-400">
-                  <Icon size={15} className="text-brand-400" />
-                  <span className="text-xs font-semibold tracking-wide">{badge.label}</span>
+                <div key={i} className="flex items-center gap-2 text-slate-300"
+                     style={{ textShadow: i % 2 === 0 ? '0 0 5px var(--color-neon-cyan)' : '0 0 5px var(--color-neon-pink)' }}>
+                  <Icon size={16} color={i % 2 === 0 ? 'var(--color-neon-cyan)' : 'var(--color-neon-pink)'} />
+                  <span className="text-xs font-bold tracking-widest uppercase">{badge.label}</span>
                 </div>
               );
             })}

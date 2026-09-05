@@ -55,7 +55,7 @@ export const EMAIL_TEMPLATES = {
           {{couponCode}}
         </div>
         <p style="margin: 25px 0;">
-          <a href="{{recoveryLink}}" style="background-color: #9333ea; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Apply Coupon & Checkout &rarr;</a>
+          <a href="{{recoveryLink}}" style="background-color: #9333ea; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Continue to Cart &rarr;</a>
         </p>
         <p style="color: #64748b; font-size: 12px;">Valid for 48 hours.</p>
       </div>
@@ -88,7 +88,7 @@ export const renderTemplate = (templateKey, variables = {}) => {
 
   const defaults = {
     customerName: variables.customerName || variables.name || 'Valued Customer',
-    recoveryLink: variables.recoveryLink || variables.link || 'http://localhost:5173/shop',
+    recoveryLink: variables.recoveryLink || variables.link || 'http://localhost:5173/cart',
     couponCode: variables.couponCode || variables.code || 'SAVE10',
     cartTotal: variables.cartTotal ? parseFloat(variables.cartTotal).toFixed(2) : '0.00',
     discountPercentage: variables.discountPercentage || '10',

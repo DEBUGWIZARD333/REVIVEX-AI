@@ -245,6 +245,7 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         clearCart,
         loadCart,
+        setCartItems,
         showNotification,
       }}
     >

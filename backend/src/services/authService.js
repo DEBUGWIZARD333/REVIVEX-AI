@@ -11,13 +11,13 @@ export const registerUser = async (userData) => {
     throw new Error('User already exists');
   }
 
-  // Create user - Force role to be 'user' for public registration
+  // Create user - allow specifying role (e.g. admin vs customer) or default to 'user'
   const user = await User.create({
     name,
     email,
     phone: phone || '+1 (555) 234-5678',
     password,
-    role: 'user',
+    role: userData.role === 'admin' ? 'admin' : 'user',
   });
 
   if (user) {
